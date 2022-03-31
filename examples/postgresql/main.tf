@@ -91,7 +91,8 @@ module "aurora" {
   db_parameter_group_name         = aws_db_parameter_group.example.id
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.example.id
   enabled_cloudwatch_logs_exports = ["postgresql"]
-  subnets = local.public_subnet_ids # only bc we want to connect local
+  subnets = local.public_subnet_ids
+  database_name = "postgres_aurora"
   master_username = var.master_username
 }
 
