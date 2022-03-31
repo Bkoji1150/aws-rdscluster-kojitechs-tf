@@ -52,7 +52,7 @@ variable "tier" {
 variable "cell_name" {
   description = "Name of the ECS cluster to deploy the service into."
   type        = string
-  defaultf     = "APP"
+  default     = "APP"
 }
 
 variable "component_name" {
