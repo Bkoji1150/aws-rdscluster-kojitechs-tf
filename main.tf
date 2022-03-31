@@ -36,29 +36,29 @@ locals {
 }
 
 
-#resource "random_password" "users_password" {
-#  for_each         = toset(var.db_users)
-#  length           = 16
-#  special          = true
-#  override_special = "_%@"
-#}
+resource "random_password" "users_password" {
+  for_each         = toset(var.db_users)
+  length           = 16
+  special          = true
+  override_special = "_%@"
+}
 
 
-#resource "aws_secretsmanager_secret_version" "user_secret_value" {
-#
-#  for_each      = toset(keys(aws_secretsmanager_secret.users_secret))
-#  secret_id     = aws_secretsmanager_secret.users_secret[each.key].id
-#  secret_string = jsonencode(merge(local.common_secret_values, { username = each.key, password = random_password.users_password[each.key].result }))
-#}
+resource "aws_secretsmanager_secret_version" "user_secret_value" {
 
-#resource "aws_secretsmanager_secret" "users_secret" {
-#
-#  for_each                = toset(var.db_users)
-#  name_prefix             = each.key == var.db_users ? "tenable-${format("%s-%s", var.component_name, terraform.workspace)}" : format("%s-%s", var.component_name, terraform.workspace)
-#  description             = "secret to manage user credential of ${each.key} on ${format("%s-%s", var.component_name, terraform.workspace)} instance"
-#  recovery_window_in_days = 0
-#
-#}
+  for_each      = toset(keys(aws_secretsmanager_secret.users_secret))
+  secret_id     = aws_secretsmanager_secret.users_secret[each.key].id
+  secret_string = jsonencode(merge(local.common_secret_values, { username = each.key, password = random_password.users_password[each.key].result }))
+}
+
+resource "aws_secretsmanager_secret" "users_secret" {
+
+  for_each                = toset(var.db_users)
+  name_prefix             = each.key == var.db_users ? "tenable-${format("%s-%s", var.component_name, terraform.workspace)}" : format("%s-%s", var.component_name, terraform.workspace)
+  description             = "secret to manage user credential of ${each.key} on ${format("%s-%s", var.component_name, terraform.workspace)} instance"
+  recovery_window_in_days = 0
+
+}
 
 resource "aws_secretsmanager_secret" "master_secret" {
 
@@ -398,73 +398,73 @@ resource "aws_security_group_rule" "egress" {
   source_security_group_id = lookup(each.value, "source_security_group_id", null)
 }
 
-#provider "postgresql" {
-#
-#  alias            = "pgconnect"
-#  host             = aws_rds_cluster.this[0].endpoint
-#  port             = local.secrets["port"]
-#  username         =  var.master_username
-#  password         = local.secrets["password"]
-#  superuser        = false
-#  sslmode          = "require"
-#  expected_version = aws_rds_cluster.this[0].engine_version
-#  connect_timeout  = 15
-#}
-#
-#resource "postgresql_database" "postgres" {
-#
-#  for_each          = toset(var.databases_created == null ? ["tenable_db"] : var.databases_created)
-#  provider          = postgresql.pgconnect
-#  name              = each.key
-#  allow_connections = true
-#  depends_on        = [aws_rds_cluster.this]
-#}
-#
-#resource "postgresql_schema" "my_schema" {
-#  for_each = {
-#    for schema, value in var.schemas_list_owners : schema => value
-#  }
-#  # Beware schema is a database object and not cluster object like users
-#  # Meaning the database you selected would dertermind were the schema would be created
-#  provider = postgresql.pgconnect
-#  name     = each.value.onwer == "database" || each.value.database == "schema" ? null : each.value.name_of_theschema
-#  owner    = each.value.onwer
-#  database = contains(var.databases_created, each.value.database) ? each.value.database : "postgres"
-#  policy {
-#    usage = each.value.usage
-#    role  = each.value.role
-#  }
-#
-#  policy {
-#    create = each.value.with_create_object
-#    usage  = each.value.with_usage
-#    role   = each.value.role_name
-#  }
-#  depends_on = [aws_rds_cluster.this]
-#}
-#
-#resource "postgresql_role" "users" {
-#
-#  provider   = postgresql.pgconnect
-#  for_each   = toset(var.db_users)
-#  name       = each.key
-#  login      = true
-#  password   = random_password.users_password[each.key].result
-#  depends_on = [aws_rds_cluster.this]
-#}
-#
-#resource "postgresql_grant" "user_privileges" {
-#  for_each = {
-#    for idx, user_privileges in var.db_users_privileges : idx => user_privileges
-#    if contains(var.db_users, user_privileges.user)
-#  }
-#
-#  database    = each.value.database
-#  provider    = postgresql.pgconnect
-#  role        = each.value.user
-#  privileges  = each.value.privileges
-#  object_type = each.value.type
-#  schema      = each.value.type == "database" && each.value.schema == "" ? null : each.value.schema
-#  objects     = each.value.type == "database" || each.value.type == "schema" ? null : each.value.objects
-#  depends_on  = [postgresql_role.users]
-#}
+provider "postgresql" {
+
+  alias            = "pgconnect"
+  host             = aws_rds_cluster.this[0].endpoint
+  port             = local.secrets["port"]
+  username         =  var.master_username
+  password         = local.secrets["password"]
+  superuser        = false
+  sslmode          = "require"
+  expected_version = aws_rds_cluster.this[0].engine_version
+  connect_timeout  = 15
+}
+
+resource "postgresql_database" "postgres" {
+
+  for_each          = toset(var.databases_created == null ? ["tenable_db"] : var.databases_created)
+  provider          = postgresql.pgconnect
+  name              = each.key
+  allow_connections = true
+  depends_on        = [aws_rds_cluster.this]
+}
+
+resource "postgresql_schema" "my_schema" {
+  for_each = {
+    for schema, value in var.schemas_list_owners : schema => value
+  }
+  # Beware schema is a database object and not cluster object like users
+  # Meaning the database you selected would dertermind were the schema would be created
+  provider = postgresql.pgconnect
+  name     = each.value.onwer == "database" || each.value.database == "schema" ? null : each.value.name_of_theschema
+  owner    = each.value.onwer
+  database = contains(var.databases_created, each.value.database) ? each.value.database : "postgres"
+  policy {
+    usage = each.value.usage
+    role  = each.value.role
+  }
+
+  policy {
+    create = each.value.with_create_object
+    usage  = each.value.with_usage
+    role   = each.value.role_name
+  }
+  depends_on = [aws_rds_cluster.this]
+}
+
+resource "postgresql_role" "users" {
+
+  provider   = postgresql.pgconnect
+  for_each   = toset(var.db_users)
+  name       = each.key
+  login      = true
+  password   = random_password.users_password[each.key].result
+  depends_on = [aws_rds_cluster.this]
+}
+
+resource "postgresql_grant" "user_privileges" {
+  for_each = {
+    for idx, user_privileges in var.db_users_privileges : idx => user_privileges
+    if contains(var.db_users, user_privileges.user)
+  }
+
+  database    = each.value.database
+  provider    = postgresql.pgconnect
+  role        = each.value.user
+  privileges  = each.value.privileges
+  object_type = each.value.type
+  schema      = each.value.type == "database" && each.value.schema == "" ? null : each.value.schema
+  objects     = each.value.type == "database" || each.value.type == "schema" ? null : each.value.objects
+  depends_on  = [postgresql_role.users]
+}

@@ -42,10 +42,6 @@ locals {
   private_sunbet_cidrs = local.operational_state.private_subnets_cidrs
 }
 
-################################################################################
-# Supporting Resources
-################################################################################
-
 
 ################################################################################
 # RDS Aurora Module
@@ -62,10 +58,6 @@ module "aurora" {
       instance_class      = "db.r5.2xlarge"
       publicly_accessible = true
     }
-#    2 = {
-#      identifier     = "static-member-1"
-#      instance_class = "db.r5.2xlarge"
-#    }
     2 = {
       identifier     = format("%s-%s", var.component_name, "writer-instance")
       instance_class = "db.r5.large"
@@ -74,18 +66,7 @@ module "aurora" {
   }
 
   endpoints = {
-#    static = {
-#      identifier     = "static-custom-endpt"
-#      type           = "ANY"
-#      static_members = ["static-member-1"]
-#      tags           = { Endpoint = "static-members" }
-#    }
-    excluded = {
-      identifier       = "excluded-custom-endpt"
-      type             = "READER"
-      excluded_members = ["excluded-member-1"]
-      tags             = { Endpoint = "excluded-members" }
-    }
+
   }
 
   vpc_id                 =  local.vpc_id
@@ -101,7 +82,7 @@ module "aurora" {
     }
   }
   iam_database_authentication_enabled = true
-# db_users                     = var.db_users
+ db_users                     = var.db_users
   create_random_password              = false
 
   apply_immediately   = true
