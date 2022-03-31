@@ -16,7 +16,7 @@ data "terraform_remote_state" "operational_environment" {
 }
 
 module "required_tags" {
-  source = "git::git@github.com:Bkoji1150/kojitechs-tf-aws-required-tags.git"
+  source = "git::https://github.com/Bkoji1150/kojitechs-tf-aws-required-tags.git"
 
   line_of_business        = var.line_of_business
   ado                     = var.ado
