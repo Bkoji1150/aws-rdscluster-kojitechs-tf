@@ -61,17 +61,14 @@ variable "component_name" {
   default     = "hqr-common-database"
 }
 
-variable "db_users" {
-  default = ["kojitechs", "robb"]
-}
 
 variable "myip" {
-  type = list
+  type    = list(any)
   default = ["71.163.242.34/32"]
 }
 
 variable "master_username" {
   description = "Username for the master DB user"
   type        = string
-  default = "postgres"
+  default     = "postgres"
 }

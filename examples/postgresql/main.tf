@@ -1,6 +1,6 @@
 
 locals {
-  name   =  "kojitechs-${replace(basename(var.component_name), "_", "-")}"
+  name   = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
   region = "us-east-1"
 }
 
@@ -33,12 +33,12 @@ module "required_tags" {
 }
 
 locals {
-  operational_state   = data.terraform_remote_state.operational_environment.outputs
-  vpc_id              = local.operational_state.vpc_id
-  public_subnet_ids   = local.operational_state.public_subnets
-  private_subnets_ids = local.operational_state.private_subnets
-  public_subnets_cidrs     = local.operational_state.public_subnet_cidr_block
-  db_subnets_names = local.operational_state.db_subnets_names
+  operational_state    = data.terraform_remote_state.operational_environment.outputs
+  vpc_id               = local.operational_state.vpc_id
+  public_subnet_ids    = local.operational_state.public_subnets
+  private_subnets_ids  = local.operational_state.private_subnets
+  public_subnets_cidrs = local.operational_state.public_subnet_cidr_block
+  db_subnets_names     = local.operational_state.db_subnets_names
   private_sunbet_cidrs = local.operational_state.private_subnets_cidrs
 }
 
@@ -56,7 +56,7 @@ module "aurora" {
   instances = {
     1 = {
       instance_class      = "db.r5.2xlarge"
-      publicly_accessible = true
+      publicly_accessible = false
     }
     2 = {
       identifier     = format("%s-%s", var.component_name, "writer-instance")
@@ -64,17 +64,15 @@ module "aurora" {
       promotion_tier = 15
     }
   }
-
   endpoints = {
-
   }
-
-  vpc_id                 =  local.vpc_id
+  vpc_id                 = local.vpc_id
   db_subnet_group_name   = local.db_subnets_names
-
   create_db_subnet_group = false
-  create_security_group  = true
-  allowed_cidr_blocks    = local.public_subnets_cidrs
+  allowed_cidr_blocks    = local.private_sunbet_cidrs
+  subnets                = local.private_subnets_ids
+
+  create_security_group = true
   security_group_egress_rules = {
     to_cidrs = {
       cidr_blocks = ["0.0.0.0/0"]
@@ -82,7 +80,6 @@ module "aurora" {
     }
   }
   iam_database_authentication_enabled = true
- db_users                     = var.db_users
   create_random_password              = false
 
   apply_immediately   = true
@@ -91,9 +88,8 @@ module "aurora" {
   db_parameter_group_name         = aws_db_parameter_group.example.id
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.example.id
   enabled_cloudwatch_logs_exports = ["postgresql"]
-  subnets = local.public_subnet_ids
-  database_name = "postgres_aurora"
-  master_username = var.master_username
+  database_name                   = "postgres_aurora"
+  master_username                 = var.master_username
 }
 
 resource "aws_db_parameter_group" "example" {
@@ -108,4 +104,3 @@ resource "aws_rds_cluster_parameter_group" "example" {
   description = "${var.component_name}-aurora-postgres11-cluster-parameter-group"
 
 }
-
