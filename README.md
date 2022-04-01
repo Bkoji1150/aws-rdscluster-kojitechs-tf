@@ -68,7 +68,7 @@ Mysql-Aurora
 
 ```hcl
 module "aurora" {
-  source = "../../"
+  source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git"
 
   name           = local.name
   engine         = "aurora-mysql"
