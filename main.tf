@@ -1,86 +1,44 @@
 locals {
   create_cluster = var.create_cluster && var.putin_khuylo
 
-  port = coalesce(var.port, (var.engine == "aurora-postgresql" ? 5432 : 3306))
-
+  port                          = coalesce(var.port, (var.engine == "aurora-postgresql" ? 5432 : 3306))
   db_subnet_group_name          = var.create_db_subnet_group ? join("", aws_db_subnet_group.this.*.name) : var.db_subnet_group_name
   internal_db_subnet_group_name = try(coalesce(var.db_subnet_group_name, var.name), "")
-  master_password               =  random_password.master_password.result
+  master_password               = random_password.master_password.result
   backtrack_window              = (var.engine == "aurora-mysql" || var.engine == "aurora") && var.engine_mode != "serverless" ? var.backtrack_window : 0
-
-  rds_enhanced_monitoring_arn = var.create_monitoring_role ? join("", aws_iam_role.rds_enhanced_monitoring.*.arn) : var.monitoring_role_arn
-  rds_security_group_id       = join("", aws_security_group.this.*.id)
-  is_serverless               = var.engine_mode == "serverless"
-#  master_password        = var.create_cluster && var.create_random_password ? random_password.master_password.result : var.password
+  rds_enhanced_monitoring_arn   = var.create_monitoring_role ? join("", aws_iam_role.rds_enhanced_monitoring.*.arn) : var.monitoring_role_arn
+  rds_security_group_id         = join("", aws_security_group.this.*.id)
+  is_serverless                 = var.engine_mode == "serverless"
 
   secrets = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
-  engines_map = {
-    aurora-postgresql = "postgres"
-    postgres          = "postgres"
-    redshift          = "redshift"
-  }
   common_tenable_values = {
-    engine     = var.engine
-    port       = local.port
-    dbname     =  var.database_name
-    identifier = format("%s-%s", var.component_name, terraform.workspace)
-    password   = local.master_password
-   }
-  common_secret_values = {
     engine   = var.engine
     endpoint = aws_rds_cluster.this[0].endpoint
-    port     = local.port
     dbname   = var.database_name
+    port     = local.port
     password = local.master_password
   }
-}
-
-
-resource "random_password" "users_password" {
-  for_each         = toset(var.db_users)
-  length           = 16
-  special          = true
-  override_special = "_%@"
-}
-
-
-resource "aws_secretsmanager_secret_version" "user_secret_value" {
-
-  for_each      = toset(keys(aws_secretsmanager_secret.users_secret))
-  secret_id     = aws_secretsmanager_secret.users_secret[each.key].id
-  secret_string = jsonencode(merge(local.common_secret_values, { username = each.key, password = random_password.users_password[each.key].result }))
-}
-
-resource "aws_secretsmanager_secret" "users_secret" {
-
-  for_each                = toset(var.db_users)
-  name_prefix             = each.key == var.db_users ? "tenable-${format("%s-%s", var.component_name, terraform.workspace)}" : format("%s-%s", var.component_name, terraform.workspace)
-  description             = "secret to manage user credential of ${each.key} on ${format("%s-%s", var.component_name, terraform.workspace)} instance"
-  recovery_window_in_days = 0
-
 }
 
 resource "aws_secretsmanager_secret" "master_secret" {
 
   name_prefix             = format("%s-%s-%s", var.component_name, "master-secret", terraform.workspace)
-  description             = "secret to manage superuser ${var.master_username} on ${format("%s-%s", var.component_name, terraform.workspace)} instance"
+  description             = "secret to manage superuser ${var.master_username} on ${format("%s-%s", var.component_name, terraform.workspace)} database"
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "master_secret_value" {
 
   secret_id     = aws_secretsmanager_secret.master_secret.id
-  secret_string = jsonencode(merge(local.common_tenable_values, { username = var.master_username, password =  random_password.master_password.result }))
+  secret_string = jsonencode(merge(local.common_tenable_values, { username = var.master_username, password = random_password.master_password.result }))
 }
-# Ref. https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#genref-aws-service-namespaces
+
 data "aws_partition" "current" {}
 
 # Random string to use as master password
 resource "random_password" "master_password" {
-#  count = local.create_cluster && var.create_random_password ? 1 : 0
- length           = 16
-  special          = true
-  override_special = "_%@"
+  length  = 16
+  special = true
 }
 
 resource "random_id" "snapshot_identifier" {
@@ -123,7 +81,7 @@ resource "aws_rds_cluster" "this" {
   kms_key_id                          = var.kms_key_id
   database_name                       = var.is_primary_cluster ? var.database_name : null
   master_username                     = var.is_primary_cluster ? var.master_username : null
-  master_password                     = local.secrets["password"]
+  master_password                     = random_password.master_password.result
   final_snapshot_identifier           = "${var.final_snapshot_identifier_prefix}-${var.name}-${element(concat(random_id.snapshot_identifier.*.hex, [""]), 0)}"
   skip_final_snapshot                 = var.skip_final_snapshot
   deletion_protection                 = var.deletion_protection
@@ -383,88 +341,16 @@ resource "aws_security_group_rule" "cidr_ingress" {
 resource "aws_security_group_rule" "egress" {
   for_each = local.create_cluster && var.create_security_group ? var.security_group_egress_rules : {}
 
-  # required
   type              = "egress"
   from_port         = lookup(each.value, "from_port", local.port)
   to_port           = lookup(each.value, "to_port", local.port)
   protocol          = "tcp"
   security_group_id = local.rds_security_group_id
 
-  # optional
+
   cidr_blocks              = lookup(each.value, "cidr_blocks", null)
   description              = lookup(each.value, "description", null)
   ipv6_cidr_blocks         = lookup(each.value, "ipv6_cidr_blocks", null)
   prefix_list_ids          = lookup(each.value, "prefix_list_ids", null)
   source_security_group_id = lookup(each.value, "source_security_group_id", null)
-}
-
-provider "postgresql" {
-
-  alias            = "pgconnect"
-  host             = aws_rds_cluster.this[0].endpoint
-  port             = local.secrets["port"]
-  username         =  var.master_username
-  password         = local.secrets["password"]
-  superuser        = false
-  sslmode          = "require"
-  expected_version = aws_rds_cluster.this[0].engine_version
-  connect_timeout  = 15
-}
-
-resource "postgresql_database" "postgres" {
-
-  for_each          = toset(var.databases_created == null ? ["tenable_db"] : var.databases_created)
-  provider          = postgresql.pgconnect
-  name              = each.key
-  allow_connections = true
-  depends_on        = [aws_rds_cluster.this]
-}
-
-resource "postgresql_schema" "my_schema" {
-  for_each = {
-    for schema, value in var.schemas_list_owners : schema => value
-  }
-  # Beware schema is a database object and not cluster object like users
-  # Meaning the database you selected would dertermind were the schema would be created
-  provider = postgresql.pgconnect
-  name     = each.value.onwer == "database" || each.value.database == "schema" ? null : each.value.name_of_theschema
-  owner    = each.value.onwer
-  database = contains(var.databases_created, each.value.database) ? each.value.database : "postgres"
-  policy {
-    usage = each.value.usage
-    role  = each.value.role
-  }
-
-  policy {
-    create = each.value.with_create_object
-    usage  = each.value.with_usage
-    role   = each.value.role_name
-  }
-  depends_on = [aws_rds_cluster.this]
-}
-
-resource "postgresql_role" "users" {
-
-  provider   = postgresql.pgconnect
-  for_each   = toset(var.db_users)
-  name       = each.key
-  login      = true
-  password   = random_password.users_password[each.key].result
-  depends_on = [aws_rds_cluster.this]
-}
-
-resource "postgresql_grant" "user_privileges" {
-  for_each = {
-    for idx, user_privileges in var.db_users_privileges : idx => user_privileges
-    if contains(var.db_users, user_privileges.user)
-  }
-
-  database    = each.value.database
-  provider    = postgresql.pgconnect
-  role        = each.value.user
-  privileges  = each.value.privileges
-  object_type = each.value.type
-  schema      = each.value.type == "database" && each.value.schema == "" ? null : each.value.schema
-  objects     = each.value.type == "database" || each.value.type == "schema" ? null : each.value.objects
-  depends_on  = [postgresql_role.users]
 }

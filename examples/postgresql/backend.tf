@@ -30,10 +30,10 @@ terraform {
   required_version = ">=1.1.5"
 
   backend "s3" {
-    bucket = "state.tf.aws.rdscluster.kojitechs"
-    key    = "terraform.tfstate/rdscluster"
+    bucket         = "state.tf.aws.rdscluster.kojitechs"
+    key            = "terraform.tfstate/rdscluster"
     dynamodb_table = "terraform-lock"
-    region = "us-east-1"
-    encrypt = true
+    region         = "us-east-1"
+    encrypt        = true
   }
 }
