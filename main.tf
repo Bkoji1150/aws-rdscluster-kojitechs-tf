@@ -37,8 +37,9 @@ data "aws_partition" "current" {}
 
 # Random string to use as master password
 resource "random_password" "master_password" {
-  length  = 16
-  special = true
+  length           = 16
+  special          = true
+  override_special = "_%@"
 }
 
 resource "random_id" "snapshot_identifier" {
@@ -247,7 +248,9 @@ resource "aws_iam_role" "rds_enhanced_monitoring" {
   force_detach_policies = var.iam_role_force_detach_policies
   max_session_duration  = var.iam_role_max_session_duration
 
-  tags = var.tags
+  tags = merge(
+    { "Name" = var.name }
+  )
 }
 
 resource "aws_iam_role_policy_attachment" "rds_enhanced_monitoring" {
