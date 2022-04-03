@@ -77,6 +77,10 @@ variable "engine_mode" {
   type        = string
   default     = null
 }
+variable "subnets_lambda" {
+  description = "List of subnet only for mysql-aurora"
+  default     = []
+}
 
 variable "engine_version" {
   description = "The database engine version. Updating this argument results in an outage"

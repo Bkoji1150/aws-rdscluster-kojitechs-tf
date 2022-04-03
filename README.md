@@ -13,6 +13,7 @@ Terraform module which creates AWS RDS Aurora resources[aws_aurora-module](git::
 - Fine grained control of individual cluster instances
 - Custom endpoints
 - secrets manager for database credentials
+####  maste database user's password is managed by aws secrets manager
 
 ## Usage
 Postgres-Aurora  module
@@ -68,7 +69,7 @@ Mysql-Aurora
 
 ```hcl
 module "aurora" {
-  source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git"
+ source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git"
 
   name           = local.name
   engine         = "aurora-mysql"
@@ -79,24 +80,20 @@ module "aurora" {
       publicly_accessible = true
     }
     2 = {
-      identifier     = "mysql-static-1"
-      instance_class = "db.r5.2xlarge"
-    }
-    3 = {
-      identifier     = "mysql-excluded-1"
+      identifier     = format("%s-%s", "kojitechs-${var.component_name}", "reader-instance")
       instance_class = "db.r5.xlarge"
       promotion_tier = 15
     }
   }
 
-  vpc_id                 = module.vpc.vpc_id
-  db_subnet_group_name   = module.vpc.database_subnet_group_name
+  vpc_id                 = local.vpc_id
+  db_subnet_group_name   = local.db_subnets_names
+
   create_db_subnet_group = false
   create_security_group  = true
-  allowed_cidr_blocks    = module.vpc.private_subnets_cidr_blocks
+  allowed_cidr_blocks    = local.private_sunbet_cidrs
 
   iam_database_authentication_enabled = true
-  master_password                     = random_password.master.result
   create_random_password              = false
 
   apply_immediately   = true
@@ -105,10 +102,10 @@ module "aurora" {
   db_parameter_group_name         = aws_db_parameter_group.example.id
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.example.id
   enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
-
-  tags = local.tags
+    database_name                   = "postgres_aurora"
+  master_username                 = var.master_username
 }
-
+  
 resource "aws_db_parameter_group" "example" {
   name        = "${local.name}-aurora-db-57-parameter-group"
   family      = "aurora-mysql5.7"
@@ -128,7 +125,7 @@ $ terraform init
 $ terraform plan
 $ terraform apply
 ```
-
+<!-- preety ignore start -->
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
@@ -265,6 +262,7 @@ No modules.
 | <a name="input_source_region"></a> [source\_region](#input\_source\_region) | The source region for an encrypted replica DB cluster | `string` | `null` | no |
 | <a name="input_storage_encrypted"></a> [storage\_encrypted](#input\_storage\_encrypted) | Specifies whether the DB cluster is encrypted. The default is `true` | `bool` | `true` | no |
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | List of subnet IDs used by database subnet group created | `list(string)` | `[]` | no |
+| <a name="input_subnets_lambda"></a> [subnets\_lambda](#input\_subnets\_lambda) | List of subnet only for mysql-aurora | `list` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 | <a name="input_tech_poc_primary"></a> [tech\_poc\_primary](#input\_tech\_poc\_primary) | Primary Point of Contact for Technical support for this service. | `string` | `"kojibello058@gmail.com"` | no |
 | <a name="input_tech_poc_secondary"></a> [tech\_poc\_secondary](#input\_tech\_poc\_secondary) | Secondary Point of Contact for Technical support for this service. | `string` | `"kojibello058@gmail.com"` | no |
@@ -297,6 +295,7 @@ No modules.
 | <a name="output_enhanced_monitoring_iam_role_unique_id"></a> [enhanced\_monitoring\_iam\_role\_unique\_id](#output\_enhanced\_monitoring\_iam\_role\_unique\_id) | Stable and unique string identifying the enhanced monitoring role |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | The security group ID of the cluster |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- preety ignore end -->
 
 ## Authors
 This module was build and maintained by [kojibello](kojibello058@gmail.com).

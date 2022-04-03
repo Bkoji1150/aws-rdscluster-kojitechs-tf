@@ -40,6 +40,7 @@ locals {
   public_subnets_cidrs = local.operational_state.public_subnet_cidr_block
   db_subnets_names     = local.operational_state.db_subnets_names
   private_sunbet_cidrs = local.operational_state.private_subnets_cidrs
+  #  baston_hots = local.operational_state.security_group_id
 }
 
 
@@ -71,7 +72,7 @@ module "aurora" {
   create_db_subnet_group = false
   allowed_cidr_blocks    = local.private_sunbet_cidrs
   subnets                = local.private_subnets_ids
-
+  #  vpc_security_group_ids = [local.baston_hots]
   create_security_group = true
   security_group_egress_rules = {
     to_cidrs = {

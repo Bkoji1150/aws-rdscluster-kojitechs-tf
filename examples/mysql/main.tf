@@ -1,40 +1,46 @@
-provider "aws" {
-  region = local.region
-}
 
 locals {
-  name   = "example-${replace(basename(path.cwd), "_", "-")}"
-  region = "eu-west-1"
-  tags = {
-    Owner       = "user"
-    Environment = "dev"
+  name   = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
+  region = "us-east-1"
+}
+
+
+data "terraform_remote_state" "operational_environment" {
+  backend = "s3"
+
+  config = {
+    region = "us-east-1"
+    bucket = "operational.vpc.tf.kojitechs"
+    key    = format("env:/%s/path/env", lower(terraform.workspace))
   }
 }
 
-################################################################################
-# Supporting Resources
-################################################################################
+module "required_tags" {
+  source = "git::https://github.com/Bkoji1150/kojitechs-tf-aws-required-tags.git"
 
-resource "random_password" "master" {
-  length = 10
+  line_of_business        = var.line_of_business
+  ado                     = var.ado
+  tier                    = var.tier
+  operational_environment = upper(terraform.workspace)
+  tech_poc_primary        = var.tech_poc_primary
+  tech_poc_secondary      = var.tech_poc_secondary
+  application             = "rds_database_Aurora_cluster"
+  builder                 = var.builder
+  application_owner       = var.application_owner
+  vpc                     = var.cell_name
+  cell_name               = var.cell_name
+  component_name          = format("%s-%s", var.component_name, terraform.workspace)
 }
 
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
-
-  name = local.name
-  cidr = "10.99.0.0/18"
-
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-
-  azs              = ["${local.region}a", "${local.region}b", "${local.region}c"]
-  public_subnets   = ["10.99.0.0/24", "10.99.1.0/24", "10.99.2.0/24"]
-  private_subnets  = ["10.99.3.0/24", "10.99.4.0/24", "10.99.5.0/24"]
-  database_subnets = ["10.99.7.0/24", "10.99.8.0/24", "10.99.9.0/24"]
-
-  tags = local.tags
+locals {
+  operational_state    = data.terraform_remote_state.operational_environment.outputs
+  vpc_id               = local.operational_state.vpc_id
+  public_subnet_ids    = local.operational_state.public_subnets
+  private_subnets_ids  = local.operational_state.private_subnets
+  public_subnets_cidrs = local.operational_state.public_subnet_cidr_block
+  db_subnets_names     = local.operational_state.db_subnets_names
+  private_sunbet_cidrs = local.operational_state.private_subnets_cidrs
+  #  baston_hots = local.operational_state.security_group_id
 }
 
 ################################################################################
@@ -53,24 +59,20 @@ module "aurora" {
       publicly_accessible = true
     }
     2 = {
-      identifier     = "mysql-static-1"
-      instance_class = "db.r5.2xlarge"
-    }
-    3 = {
-      identifier     = "mysql-excluded-1"
+      identifier     = format("%s-%s", "kojitechs-${var.component_name}", "reader-instance")
       instance_class = "db.r5.xlarge"
       promotion_tier = 15
     }
   }
 
-  vpc_id                 = module.vpc.vpc_id
-  db_subnet_group_name   = module.vpc.database_subnet_group_name
+  vpc_id               = local.vpc_id
+  db_subnet_group_name = local.db_subnets_names
+
   create_db_subnet_group = false
   create_security_group  = true
-  allowed_cidr_blocks    = module.vpc.private_subnets_cidr_blocks
+  allowed_cidr_blocks    = local.private_sunbet_cidrs
 
   iam_database_authentication_enabled = true
-  master_password                     = random_password.master.result
   create_random_password              = false
 
   apply_immediately   = true
@@ -79,20 +81,18 @@ module "aurora" {
   db_parameter_group_name         = aws_db_parameter_group.example.id
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.example.id
   enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
-
-  tags = local.tags
+  database_name                   = "postgres_aurora"
+  master_username                 = var.master_username
 }
 
 resource "aws_db_parameter_group" "example" {
   name        = "${local.name}-aurora-db-57-parameter-group"
   family      = "aurora-mysql5.7"
   description = "${local.name}-aurora-db-57-parameter-group"
-  tags        = local.tags
 }
 
 resource "aws_rds_cluster_parameter_group" "example" {
   name        = "${local.name}-aurora-57-cluster-parameter-group"
   family      = "aurora-mysql5.7"
   description = "${local.name}-aurora-57-cluster-parameter-group"
-  tags        = local.tags
 }
