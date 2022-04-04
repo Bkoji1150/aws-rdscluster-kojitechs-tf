@@ -40,12 +40,13 @@ locals {
   public_subnets_cidrs = local.operational_state.public_subnet_cidr_block
   db_subnets_names     = local.operational_state.db_subnets_names
   private_sunbet_cidrs = local.operational_state.private_subnets_cidrs
-  #  baston_hots = local.operational_state.security_group_id
+  private_instance_sg  = local.operational_state.baston_id
 }
 
 ################################################################################
 # RDS Aurora Module
 ################################################################################
+
 
 module "aurora" {
   source = "../../"
@@ -65,18 +66,24 @@ module "aurora" {
     }
   }
 
-  vpc_id               = local.vpc_id
-  db_subnet_group_name = local.db_subnets_names
-
+  vpc_id                 = local.vpc_id
+  db_subnet_group_name   = local.db_subnets_names
+  vpc_security_group_ids = [local.private_instance_sg]
   create_db_subnet_group = false
   create_security_group  = true
-  allowed_cidr_blocks    = local.private_sunbet_cidrs
+  # allowed_cidr_blocks    = local.private_sunbet_cidrs
 
   iam_database_authentication_enabled = true
   create_random_password              = false
 
   apply_immediately   = true
   skip_final_snapshot = true
+  security_group_egress_rules = {
+    to_cidrs = {
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Egress to corporate printer closet"
+    }
+  }
 
   db_parameter_group_name         = aws_db_parameter_group.example.id
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.example.id

@@ -13,7 +13,14 @@ locals {
   secrets = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
   common_tenable_values = {
     engine   = var.engine
-    endpoint = aws_rds_cluster.this[0].endpoint
+    endpoint = try(aws_rds_cluster.this[0].endpoint, "")
+    dbname   = var.database_name
+    port     = local.port
+    password = local.master_password
+  }
+  reader_instance = {
+    engine   = var.engine
+    endpoint = try(aws_rds_cluster.this[0].reader_endpoint, "")
     dbname   = var.database_name
     port     = local.port
     password = local.master_password
@@ -21,26 +28,34 @@ locals {
 }
 
 resource "aws_secretsmanager_secret" "master_secret" {
-
-  name_prefix             = format("%s-%s-%s", var.component_name, "master-secret", terraform.workspace)
-  description             = "secret to manage superuser ${var.master_username} on ${format("%s-%s", var.component_name, terraform.workspace)} database"
+  name_prefix             = format("%s-%s-%s", var.component_name, "Writer-endpoint", terraform.workspace)
+  description             = "secret to manage superuser ${var.master_username} on ${format("%s-%s", var.component_name, terraform.workspace)} Writer instance"
   recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "master_secret_value" {
-
   secret_id     = aws_secretsmanager_secret.master_secret.id
   secret_string = jsonencode(merge(local.common_tenable_values, { username = var.master_username, password = random_password.master_password.result }))
 }
 
+resource "aws_secretsmanager_secret" "master_secret_readenpoints" {
+  name_prefix             = format("%s-%s", var.component_name, "Reader-endpoint")
+  description             = "Secret to manage superuser ${var.master_username} on ${format("%s-%s", var.component_name, terraform.workspace)} Reader instance"
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "master_secret_value_readenpoints" {
+  secret_id     = aws_secretsmanager_secret.master_secret_readenpoints.id
+  secret_string = jsonencode(merge(local.reader_instance, { username = var.master_username, password = random_password.master_password.result }))
+}
+
 data "aws_partition" "current" {}
 
-# Random string to use as master password
 resource "random_password" "master_password" {
-  length           = 16
-  special          = true
-  override_special = "_%@"
+  length  = 16
+  special = true
 }
+
 
 resource "random_id" "snapshot_identifier" {
   count = local.create_cluster ? 1 : 0
@@ -65,8 +80,6 @@ resource "aws_db_subnet_group" "this" {
 resource "aws_rds_cluster" "this" {
   count = local.create_cluster ? 1 : 0
 
-  # Notes:
-  # iam_roles has been removed from this resource and instead will be used with aws_rds_cluster_role_association below to avoid conflicts per docs
 
   global_cluster_identifier      = var.global_cluster_identifier
   enable_global_write_forwarding = var.enable_global_write_forwarding
@@ -349,7 +362,6 @@ resource "aws_security_group_rule" "egress" {
   to_port           = lookup(each.value, "to_port", local.port)
   protocol          = "tcp"
   security_group_id = local.rds_security_group_id
-
 
   cidr_blocks              = lookup(each.value, "cidr_blocks", null)
   description              = lookup(each.value, "description", null)

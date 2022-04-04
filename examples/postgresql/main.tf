@@ -47,9 +47,13 @@ locals {
 ################################################################################
 # RDS Aurora Module
 ################################################################################
+variable "allowe_to_create" {
+  default = false
+}
 
 module "aurora" {
   source = "../../"
+  count  = var.allowe_to_create || terraform.workspace == "prod" ? 1 : 0
 
   name           = local.name
   engine         = "aurora-postgresql"

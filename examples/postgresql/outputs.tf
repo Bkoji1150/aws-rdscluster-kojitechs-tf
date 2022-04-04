@@ -10,6 +10,9 @@ output "cluster_arn" {
   value       = module.aurora.cluster_arn
 }
 
+output "aws_secrets_version" {
+  value = module.aurora.secrets_version
+}
 output "cluster_id" {
   description = "The RDS Cluster Identifier"
   value       = module.aurora.cluster_id
