@@ -50,6 +50,7 @@ Note that this example may create resources which cost money. Run `terraform des
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ado"></a> [ado](#input\_ado) | Compainy name for this project | `string` | `"Kojitechs"` | no |
+| <a name="input_allowe_to_create"></a> [allowe\_to\_create](#input\_allowe\_to\_create) | ############################################################################### RDS Aurora Module ############################################################################### | `bool` | `false` | no |
 | <a name="input_application_owner"></a> [application\_owner](#input\_application\_owner) | Email Group for the Application owner. | `string` | `"kojibello058@gmail.com"` | no |
 | <a name="input_aws_account_id"></a> [aws\_account\_id](#input\_aws\_account\_id) | Environment this template would be deployed to | `map(string)` | <pre>{<br>  "prod": "735972722491",<br>  "sbx": "674293488770"<br>}</pre> | no |
 | <a name="input_builder"></a> [builder](#input\_builder) | Email for the builder of this infrastructure | `string` | `"kojibello058@gmail.com"` | no |
@@ -67,6 +68,7 @@ Note that this example may create resources which cost money. Run `terraform des
 | Name | Description |
 |------|-------------|
 | <a name="output_additional_cluster_endpoints"></a> [additional\_cluster\_endpoints](#output\_additional\_cluster\_endpoints) | A map of additional cluster endpoints and their attributes |
+| <a name="output_aws_secrets_version"></a> [aws\_secrets\_version](#output\_aws\_secrets\_version) | n/a |
 | <a name="output_cluster_arn"></a> [cluster\_arn](#output\_cluster\_arn) | Amazon Resource Name (ARN) of cluster |
 | <a name="output_cluster_database_name"></a> [cluster\_database\_name](#output\_cluster\_database\_name) | Name for an automatically created database on cluster creation |
 | <a name="output_cluster_endpoint"></a> [cluster\_endpoint](#output\_cluster\_endpoint) | Writer endpoint for the cluster |

@@ -15,6 +15,10 @@ output "cluster_id" {
   value       = try(aws_rds_cluster.this[0].id, "")
 }
 
+output "secrets_version" {
+  value     = aws_secretsmanager_secret_version.master_secret_value
+  sensitive = true
+}
 output "cluster_resource_id" {
   description = "The RDS Cluster Resource ID"
   value       = try(aws_rds_cluster.this[0].cluster_resource_id, "")

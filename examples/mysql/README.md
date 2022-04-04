@@ -68,6 +68,7 @@ Note that this example may create resources which cost money. Run `terraform des
 | Name | Description |
 |------|-------------|
 | <a name="output_additional_cluster_endpoints"></a> [additional\_cluster\_endpoints](#output\_additional\_cluster\_endpoints) | A map of additional cluster endpoints and their attributes |
+| <a name="output_aws_secrets_version"></a> [aws\_secrets\_version](#output\_aws\_secrets\_version) | n/a |
 | <a name="output_cluster_arn"></a> [cluster\_arn](#output\_cluster\_arn) | Amazon Resource Name (ARN) of cluster |
 | <a name="output_cluster_database_name"></a> [cluster\_database\_name](#output\_cluster\_database\_name) | Name for an automatically created database on cluster creation |
 | <a name="output_cluster_endpoint"></a> [cluster\_endpoint](#output\_cluster\_endpoint) | Writer endpoint for the cluster |
