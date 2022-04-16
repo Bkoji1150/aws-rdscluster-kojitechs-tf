@@ -54,6 +54,7 @@ data "aws_partition" "current" {}
 resource "random_password" "master_password" {
   length  = 16
   special = true
+   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 
