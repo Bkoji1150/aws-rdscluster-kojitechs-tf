@@ -16,7 +16,7 @@ output "cluster_id" {
 }
 
 output "secrets_version" {
-  value     = aws_secretsmanager_secret_version.master_secret_value
+  value     = aws_secretsmanager_secret_version.master_secret_value.secret_id
   sensitive = true
 }
 output "cluster_resource_id" {
