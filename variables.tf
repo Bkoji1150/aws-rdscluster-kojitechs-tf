@@ -109,12 +109,13 @@ variable "kms_key_id" {
 variable "database_name" {
   description = "Name for an automatically created database on cluster creation"
   type        = string
-  default     = webappdb
+  default     = "webappdb"
 }
 
 variable "master_username" {
   description = "Username for the master DB user"
-  type        = postgresadmin
+  type        = string
+  default = "postgresadmin"
 }
 
 variable "create_random_password" {
