@@ -115,7 +115,7 @@ variable "database_name" {
 variable "master_username" {
   description = "Username for the master DB user"
   type        = string
-  default = "postgresadmin"
+  default     = "postgresadmin"
 }
 
 variable "create_random_password" {
