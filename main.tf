@@ -6,7 +6,7 @@ locals {
   db_parameter_group_name         = var.create_db_parameter_group ? join("", aws_db_parameter_group.this.*.id) : var.db_parameter_group_name
   db_cluster_parameter_group_name = var.create_cluster_parameter_group ? join("", aws_rds_cluster_parameter_group.this.*.id) : var.db_cluster_parameter_group_name
 
-  internal_db_subnet_group_name = try(coalesce(var.db_subnet_group_name, var.name), "")
+  internal_db_subnet_group_name = format("%s-%s", var.component_name, "dbsubnet")
   master_password               = random_password.master_password.result
   backtrack_window              = (var.engine == "aurora-mysql" || var.engine == "aurora") && var.engine_mode != "serverless" ? var.backtrack_window : 0
   rds_enhanced_monitoring_arn   = var.create_monitoring_role ? join("", aws_iam_role.rds_enhanced_monitoring.*.arn) : var.monitoring_role_arn
