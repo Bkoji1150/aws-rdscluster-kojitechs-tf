@@ -11,7 +11,8 @@ output "cluster_arn" {
 }
 
 output "aws_secrets_version" {
-  value = module.aurora.secrets_version
+  value     = module.aurora.secrets_version
+  sensitive = true
 }
 output "cluster_id" {
   description = "The RDS Cluster Identifier"

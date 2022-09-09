@@ -20,8 +20,9 @@ Postgres-Aurora  module
 ```hcl
 
 module "aurora" {
-  source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git"
+   source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git?ref=v1.1.0"
 
+  component_name = var.component_name
   name           = local.name
   engine         = "aurora-postgresql"
   engine_version = "11.12"
@@ -38,13 +39,13 @@ module "aurora" {
   }
   endpoints = {
   }
-  vpc_id                 =  "vpc_id"
-  db_subnet_group_name   = ["db_subnet_group_name"]
+  vpc_id                 = local.vpc_id
+  db_subnet_group_name   = local.db_subnets_names
   create_db_subnet_group = false
-  allowed_cidr_blocks    = ["10.0.0.0/24", "10.0.2.0/24"]
-  subnets = ["subnets"]
+  allowed_cidr_blocks    = local.private_sunbet_cidrs
+  subnets                = local.private_subnets_ids
 
-    create_security_group  = true
+  create_security_group = true
   security_group_egress_rules = {
     to_cidrs = {
       cidr_blocks = ["0.0.0.0/0"]
@@ -52,28 +53,27 @@ module "aurora" {
     }
   }
   iam_database_authentication_enabled = true
-  create_random_password              = false
 
   apply_immediately   = true
   skip_final_snapshot = true
 
-  db_parameter_group_name         = aws_db_parameter_group.example.id
-  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.example.id
   enabled_cloudwatch_logs_exports = ["postgresql"]
-  database_name = "postgres_aurora"
-  master_username = var.master_username
+  database_name                   = "postgres_aurora"
+  master_username                 = var.master_username
 }
+
 
 ```
 Mysql-Aurora
 
 ```hcl
 module "aurora" {
- source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git"
+ source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git?ref=v1.1.0"
 
+component_name = var.component_name
   name           = local.name
   engine         = "aurora-mysql"
-  engine_version = "5.7.12"
+  engine_version = "5.7.mysql_aurora.2.10.1"
   instances = {
     1 = {
       instance_class      = "db.r5.large"
@@ -91,34 +91,22 @@ module "aurora" {
 
   create_db_subnet_group = false
   create_security_group  = true
-  allowed_cidr_blocks    = local.private_sunbet_cidrs
 
   iam_database_authentication_enabled = true
-  create_random_password              = false
-
   apply_immediately   = true
   skip_final_snapshot = true
+  security_group_egress_rules = {
+    to_cidrs = {
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Egress to corporate printer closet"
+    }
+  }
 
-  db_parameter_group_name         = aws_db_parameter_group.example.id
-  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.example.id
   enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
-    database_name                   = "postgres_aurora"
+  database_name                   = "postgres_aurora"
   master_username                 = var.master_username
 }
   
-resource "aws_db_parameter_group" "example" {
-  name        = "${local.name}-aurora-db-57-parameter-group"
-  family      = "aurora-mysql5.7"
-  description = "${local.name}-aurora-db-57-parameter-group"
-  tags        = local.tags
-}
-
-resource "aws_rds_cluster_parameter_group" "example" {
-  name        = "${local.name}-aurora-57-cluster-parameter-group"
-  family      = "aurora-mysql5.7"
-  description = "${local.name}-aurora-57-cluster-parameter-group"
-  tags        = local.tags
-}
 ```
 ```bash
 $ terraform init

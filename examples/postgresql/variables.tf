@@ -26,23 +26,12 @@ variable "tech_poc_primary" {
   default     = "kojibello058@gmail.com"
 }
 
-variable "tech_poc_secondary" {
-  description = "Secondary Point of Contact for Technical support for this service."
-  type        = string
-  default     = "kojibello058@gmail.com"
-}
-
-
-variable "line_of_business" {
-  description = "Line of Business"
-  type        = string
-  default     = "Kojitechs"
-}
 variable "ado" {
   description = "Compainy name for this project"
   type        = string
   default     = "Kojitechs"
 }
+
 variable "tier" {
   type        = string
   description = "Canonical name of the application tier"
@@ -61,14 +50,28 @@ variable "component_name" {
   default     = "hqr-common-database"
 }
 
-
-variable "myip" {
-  type    = list(any)
-  default = ["71.163.242.34/32"]
-}
-
 variable "master_username" {
   description = "Username for the master DB user"
   type        = string
   default     = "postgres"
 }
+
+variable "application" {
+  description = "Logical name for the application. Mainly used for kojitechs. For an ADO/LOB owned application default to the LOB name."
+  type        = string
+  default     = "test-postgres"
+}
+
+variable "line_of_business" {
+  description = "HIDS LOB that owns the resource."
+  type        = string
+  default     = "TECH"
+}
+
+variable "vpc" {
+  description = "The VPC the resource resides in. We need this to differentiate from Lifecycle Environment due to INFRA and SEC. One of \"APP\", \"INFRA\", \"SEC\", \"ROUTING\"."
+  type        = string
+  default     = "APP"
+}
+
+

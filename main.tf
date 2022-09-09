@@ -3,6 +3,9 @@ locals {
 
   port                          = coalesce(var.port, (var.engine == "aurora-postgresql" ? 5432 : 3306))
   db_subnet_group_name          = var.create_db_subnet_group ? join("", aws_db_subnet_group.this.*.name) : var.db_subnet_group_name
+  db_parameter_group_name = var.create_db_parameter_group ? join("", aws_db_parameter_group.this.*.id) : var.db_parameter_group_name
+  db_cluster_parameter_group_name = var.create_cluster_parameter_group ? join("", aws_rds_cluster_parameter_group.this.*.id) : var.db_cluster_parameter_group_name
+
   internal_db_subnet_group_name = try(coalesce(var.db_subnet_group_name, var.name), "")
   master_password               = random_password.master_password.result
   backtrack_window              = (var.engine == "aurora-mysql" || var.engine == "aurora") && var.engine_mode != "serverless" ? var.backtrack_window : 0
@@ -10,7 +13,6 @@ locals {
   rds_security_group_id         = join("", aws_security_group.this.*.id)
   is_serverless                 = var.engine_mode == "serverless"
 
-  secrets = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)
   common_tenable_values = {
     engine   = var.engine
     endpoint = try(aws_rds_cluster.this[0].endpoint, "")
@@ -56,8 +58,6 @@ resource "random_password" "master_password" {
   special = false
 }
 
-
-
 resource "random_id" "snapshot_identifier" {
   count = local.create_cluster ? 1 : 0
 
@@ -74,13 +74,27 @@ resource "aws_db_subnet_group" "this" {
   name        = local.internal_db_subnet_group_name
   description = "For Aurora cluster ${var.name}"
   subnet_ids  = var.subnets
+}
 
-  tags = var.tags
+### PARAMETER GROUP
+resource "aws_db_parameter_group" "this" {
+  count = local.create_cluster && var.create_db_parameter_group ? 1 : 0
+
+  name        = "${var.name}-aurora-db-${var.engine}-parameter-group"
+ family      = var.engine ==  "aurora-postgresql" ? "aurora-postgresql11" : "aurora-mysql5.7"
+  description = "${var.name}-aurora-db-${var.engine}-parameter-group"
+}
+
+resource "aws_rds_cluster_parameter_group" "this" {
+  count = local.create_cluster && var.create_cluster_parameter_group ? 1 : 0
+
+  name        = "${var.name}-aurora-${var.engine}-cluster-parameter-group"
+  family      = var.engine ==  "aurora-postgresql" ? "aurora-postgresql11" : "aurora-mysql5.7"
+  description = "${var.name}-aurora-${var.engine}-cluster-parameter-group"
 }
 
 resource "aws_rds_cluster" "this" {
   count = local.create_cluster ? 1 : 0
-
 
   global_cluster_identifier      = var.global_cluster_identifier
   enable_global_write_forwarding = var.enable_global_write_forwarding
@@ -109,7 +123,7 @@ resource "aws_rds_cluster" "this" {
   snapshot_identifier                 = var.snapshot_identifier
   storage_encrypted                   = var.storage_encrypted
   apply_immediately                   = var.apply_immediately
-  db_cluster_parameter_group_name     = var.db_cluster_parameter_group_name
+  db_cluster_parameter_group_name     = local.db_cluster_parameter_group_name 
   db_instance_parameter_group_name    = var.allow_major_version_upgrade ? var.db_cluster_db_instance_parameter_group_name : null
   iam_database_authentication_enabled = var.iam_database_authentication_enabled
   backtrack_window                    = local.backtrack_window
@@ -183,7 +197,7 @@ resource "aws_rds_cluster_instance" "this" {
   instance_class                        = lookup(each.value, "instance_class", var.instance_class)
   publicly_accessible                   = lookup(each.value, "publicly_accessible", var.publicly_accessible)
   db_subnet_group_name                  = local.db_subnet_group_name
-  db_parameter_group_name               = lookup(each.value, "db_parameter_group_name", var.db_parameter_group_name)
+  db_parameter_group_name               = local.db_parameter_group_name
   apply_immediately                     = lookup(each.value, "apply_immediately", var.apply_immediately)
   monitoring_role_arn                   = local.rds_enhanced_monitoring_arn
   monitoring_interval                   = lookup(each.value, "monitoring_interval", var.monitoring_interval)

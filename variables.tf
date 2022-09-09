@@ -36,6 +36,18 @@ variable "create_cluster" {
   default     = true
 }
 
+variable "create_db_parameter_group" {
+  description = "Whether cluster should be created db parameter group"
+  type        = bool
+  default     = true
+}
+
+variable "create_cluster_parameter_group" {
+  description = "Whether cluster should be created (affects nearly all resources)"
+  type        = bool
+  default     = true
+}
+
 variable "is_primary_cluster" {
   description = "Determines whether cluster is primary cluster with writer instance (set to `false` for global cluster and replica clusters)"
   type        = bool
@@ -77,10 +89,6 @@ variable "engine_mode" {
   type        = string
   default     = null
 }
-variable "subnets_lambda" {
-  description = "List of subnet only for mysql-aurora"
-  default     = []
-}
 
 variable "engine_version" {
   description = "The database engine version. Updating this argument results in an outage"
@@ -115,29 +123,7 @@ variable "database_name" {
 variable "master_username" {
   description = "Username for the master DB user"
   type        = string
-  default     = "postgresadmin"
-}
-
-variable "create_random_password" {
-  description = "Determines whether to create random password for RDS primary cluster"
-  type        = bool
-  default     = true
-}
-
-variable "random_password_length" {
-  description = "Length of random password to create. Defaults to `10`"
-  type        = number
-  default     = 10
-}
-variable "password" {
-  description = "Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file"
-  type        = string
-  default     = null
-}
-variable "master_password" {
-  description = "Password for the master DB user. Note - when specifying a value here, 'create_random_password' should be set to `false`"
-  type        = string
-  default     = null
+  default     = "admin"
 }
 
 variable "final_snapshot_identifier_prefix" {
@@ -162,13 +148,6 @@ variable "backup_retention_period" {
   description = "The days to retain backups for. Default `7`"
   type        = number
   default     = 7
-}
-
-
-variable "db_username" {
-  description = "Username for the master DB user"
-  type        = string
-  default     = null
 }
 
 variable "preferred_backup_window" {
@@ -523,31 +502,6 @@ variable "putin_khuylo" {
   description = "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
   type        = bool
   default     = true
-}
-
-
-variable "application_owner" {
-  description = "Email Group for the Application owner."
-  type        = string
-  default     = "kojibello058@gmail.com"
-}
-
-variable "builder" {
-  description = "Email for the builder of this infrastructure"
-  type        = string
-  default     = "kojibello058@gmail.com"
-}
-
-variable "tech_poc_primary" {
-  description = "Primary Point of Contact for Technical support for this service."
-  type        = string
-  default     = "kojibello058@gmail.com"
-}
-
-variable "tech_poc_secondary" {
-  description = "Secondary Point of Contact for Technical support for this service."
-  type        = string
-  default     = "kojibello058@gmail.com"
 }
 
 variable "component_name" {

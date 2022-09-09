@@ -1,9 +1,7 @@
 
 locals {
-  name   = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
-  region = "us-east-1"
+  name = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
 }
-
 
 data "terraform_remote_state" "operational_environment" {
   backend = "s3"
@@ -16,20 +14,20 @@ data "terraform_remote_state" "operational_environment" {
 }
 
 module "required_tags" {
-  source = "git::https://github.com/Bkoji1150/kojitechs-tf-aws-required-tags.git"
+  source = "git::https://github.com/Bkoji1150/kojitechs-tf-aws-required-tags.git?ref=v1.0.0"
 
   line_of_business        = var.line_of_business
   ado                     = var.ado
   tier                    = var.tier
   operational_environment = upper(terraform.workspace)
   tech_poc_primary        = var.tech_poc_primary
-  tech_poc_secondary      = var.tech_poc_secondary
-  application             = "rds_database_Aurora_cluster"
+  tech_poc_secondary      = var.builder
+  application             = var.application
   builder                 = var.builder
   application_owner       = var.application_owner
-  vpc                     = var.cell_name
+  vpc                     = var.vpc
   cell_name               = var.cell_name
-  component_name          = format("%s-%s", var.component_name, terraform.workspace)
+  component_name          = var.component_name
 }
 
 locals {
@@ -40,21 +38,17 @@ locals {
   public_subnets_cidrs = local.operational_state.public_subnet_cidr_block
   db_subnets_names     = local.operational_state.db_subnets_names
   private_sunbet_cidrs = local.operational_state.private_subnets_cidrs
-  #  baston_hots = local.operational_state.security_group_id
 }
 
 
 ################################################################################
 # RDS Aurora Module
 ################################################################################
-variable "allowe_to_create" {
-  default = false
-}
 
 module "aurora" {
   source = "../../"
-  count  = var.allowe_to_create || terraform.workspace == "prod" ? 1 : 0
 
+  component_name = var.component_name
   name           = local.name
   engine         = "aurora-postgresql"
   engine_version = "11.12"
@@ -76,7 +70,7 @@ module "aurora" {
   create_db_subnet_group = false
   allowed_cidr_blocks    = local.private_sunbet_cidrs
   subnets                = local.private_subnets_ids
-  #  vpc_security_group_ids = [local.baston_hots]
+
   create_security_group = true
   security_group_egress_rules = {
     to_cidrs = {
@@ -85,27 +79,12 @@ module "aurora" {
     }
   }
   iam_database_authentication_enabled = true
-  create_random_password              = false
 
   apply_immediately   = true
   skip_final_snapshot = true
 
-  db_parameter_group_name         = aws_db_parameter_group.example.id
-  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.example.id
   enabled_cloudwatch_logs_exports = ["postgresql"]
   database_name                   = "postgres_aurora"
   master_username                 = var.master_username
 }
 
-resource "aws_db_parameter_group" "example" {
-  name        = "${var.component_name}-aurora-db-postgres11-parameter-group"
-  family      = "aurora-postgresql11"
-  description = "${var.component_name}-aurora-db-postgres11-parameter-group"
-}
-
-resource "aws_rds_cluster_parameter_group" "example" {
-  name        = "${var.component_name}-aurora-postgres11-cluster-parameter-group"
-  family      = "aurora-postgresql11"
-  description = "${var.component_name}-aurora-postgres11-cluster-parameter-group"
-
-}
