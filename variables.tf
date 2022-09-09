@@ -551,27 +551,27 @@ variable "tech_poc_secondary" {
 }
 
 
-variable "line_of_business" {
-  description = "Line of Business"
-  type        = string
-  default     = ""
-}
-variable "ado" {
-  description = "Compainy name for this project"
-  type        = string
-  default     = "Kojitechs"
-}
-variable "tier" {
-  type        = string
-  description = "Canonical name of the application tier"
-  default     = "DATA"
-}
+# variable "line_of_business" {
+#   description = "Line of Business"
+#   type        = string
+#   default     = ""
+# }
+# variable "ado" {
+#   description = "Compainy name for this project"
+#   type        = string
+#   default     = "Kojitechs"
+# }
+# variable "tier" {
+#   type        = string
+#   description = "Canonical name of the application tier"
+#   default     = "DATA"
+# }
 
-variable "cell_name" {
-  description = "Name of the ECS cluster to deploy the service into."
-  type        = string
-  default     = "APP"
-}
+# variable "cell_name" {
+#   description = "Name of the ECS cluster to deploy the service into."
+#   type        = string
+#   default     = "APP"
+# }
 
 variable "component_name" {
   description = "Name of the component."
