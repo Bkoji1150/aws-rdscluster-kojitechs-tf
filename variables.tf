@@ -480,7 +480,7 @@ variable "autoscaling_target_connections" {
 variable "create_security_group" {
   description = "Determines whether to create security group for RDS cluster"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "vpc_id" {
@@ -554,7 +554,7 @@ variable "tech_poc_secondary" {
 variable "line_of_business" {
   description = "Line of Business"
   type        = string
-  default     = "Kojitechs"
+  default     = ""
 }
 variable "ado" {
   description = "Compainy name for this project"
@@ -576,5 +576,5 @@ variable "cell_name" {
 variable "component_name" {
   description = "Name of the component."
   type        = string
-  default     = "hqr-common-database"
+
 }
