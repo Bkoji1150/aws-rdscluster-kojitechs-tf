@@ -87,4 +87,3 @@ module "aurora" {
   database_name                   = "postgres_aurora"
   master_username                 = var.master_username
 }
-

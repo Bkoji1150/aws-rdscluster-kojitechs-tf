@@ -1,6 +1,6 @@
 
 locals {
-  name   = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
+  name = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
 }
 
 
@@ -49,7 +49,7 @@ locals {
 module "aurora" {
   source = "../../"
 
- component_name = var.component_name
+  component_name = var.component_name
   name           = local.name
   engine         = "aurora-mysql"
   engine_version = "5.7.mysql_aurora.2.10.1"
@@ -65,15 +65,15 @@ module "aurora" {
     }
   }
 
-  vpc_id                 = local.vpc_id
-  db_subnet_group_name   = local.db_subnets_names
+  vpc_id               = local.vpc_id
+  db_subnet_group_name = local.db_subnets_names
 
   create_db_subnet_group = false
   create_security_group  = true
 
   iam_database_authentication_enabled = true
-  apply_immediately   = true
-  skip_final_snapshot = true
+  apply_immediately                   = true
+  skip_final_snapshot                 = true
   security_group_egress_rules = {
     to_cidrs = {
       cidr_blocks = ["0.0.0.0/0"]

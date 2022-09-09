@@ -1,9 +1,9 @@
 locals {
   create_cluster = var.create_cluster && var.putin_khuylo
 
-  port                          = coalesce(var.port, (var.engine == "aurora-postgresql" ? 5432 : 3306))
-  db_subnet_group_name          = var.create_db_subnet_group ? join("", aws_db_subnet_group.this.*.name) : var.db_subnet_group_name
-  db_parameter_group_name = var.create_db_parameter_group ? join("", aws_db_parameter_group.this.*.id) : var.db_parameter_group_name
+  port                            = coalesce(var.port, (var.engine == "aurora-postgresql" ? 5432 : 3306))
+  db_subnet_group_name            = var.create_db_subnet_group ? join("", aws_db_subnet_group.this.*.name) : var.db_subnet_group_name
+  db_parameter_group_name         = var.create_db_parameter_group ? join("", aws_db_parameter_group.this.*.id) : var.db_parameter_group_name
   db_cluster_parameter_group_name = var.create_cluster_parameter_group ? join("", aws_rds_cluster_parameter_group.this.*.id) : var.db_cluster_parameter_group_name
 
   internal_db_subnet_group_name = try(coalesce(var.db_subnet_group_name, var.name), "")
@@ -81,7 +81,7 @@ resource "aws_db_parameter_group" "this" {
   count = local.create_cluster && var.create_db_parameter_group ? 1 : 0
 
   name        = "${var.name}-aurora-db-${var.engine}-parameter-group"
- family      = var.engine ==  "aurora-postgresql" ? "aurora-postgresql11" : "aurora-mysql5.7"
+  family      = var.engine == "aurora-postgresql" ? "aurora-postgresql11" : "aurora-mysql5.7"
   description = "${var.name}-aurora-db-${var.engine}-parameter-group"
 }
 
@@ -89,7 +89,7 @@ resource "aws_rds_cluster_parameter_group" "this" {
   count = local.create_cluster && var.create_cluster_parameter_group ? 1 : 0
 
   name        = "${var.name}-aurora-${var.engine}-cluster-parameter-group"
-  family      = var.engine ==  "aurora-postgresql" ? "aurora-postgresql11" : "aurora-mysql5.7"
+  family      = var.engine == "aurora-postgresql" ? "aurora-postgresql11" : "aurora-mysql5.7"
   description = "${var.name}-aurora-${var.engine}-cluster-parameter-group"
 }
 
@@ -123,7 +123,7 @@ resource "aws_rds_cluster" "this" {
   snapshot_identifier                 = var.snapshot_identifier
   storage_encrypted                   = var.storage_encrypted
   apply_immediately                   = var.apply_immediately
-  db_cluster_parameter_group_name     = local.db_cluster_parameter_group_name 
+  db_cluster_parameter_group_name     = local.db_cluster_parameter_group_name
   db_instance_parameter_group_name    = var.allow_major_version_upgrade ? var.db_cluster_db_instance_parameter_group_name : null
   iam_database_authentication_enabled = var.iam_database_authentication_enabled
   backtrack_window                    = local.backtrack_window

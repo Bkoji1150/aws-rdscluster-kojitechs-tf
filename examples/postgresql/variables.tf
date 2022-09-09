@@ -73,5 +73,3 @@ variable "vpc" {
   type        = string
   default     = "APP"
 }
-
-
