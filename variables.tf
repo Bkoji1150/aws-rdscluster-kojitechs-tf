@@ -162,6 +162,12 @@ variable "preferred_maintenance_window" {
   default     = "sun:05:00-sun:06:00"
 }
 
+variable "db_subnet_groupname" {
+  description = "The name of db subnet goup"
+  type        = string
+  default     = "dbsubnet"
+}
+
 variable "port" {
   description = "The port on which the DB accepts connections"
   type        = string
