@@ -20,7 +20,7 @@ Postgres-Aurora  module
 ```hcl
 
 module "aurora" {
-   source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git?ref=v1.1.0"
+   source = "git::https://github.com/Bkoji1150/aws-rdscluster-kojitechs-tf.git?ref=v1.1.11"
 
   component_name = var.component_name
   name           = local.name
