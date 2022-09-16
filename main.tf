@@ -70,7 +70,7 @@ resource "random_id" "snapshot_identifier" {
 resource "aws_db_subnet_group" "this" {
   count = local.create_cluster && var.create_db_subnet_group ? 1 : 0
 
-  name        = format("%s-%s", var.component_name, var.db_subnet_groupname)
+  name        = lower(format("%s-%s", var.component_name, var.db_subnet_groupname))
   description = "For Aurora cluster ${var.name}"
   subnet_ids  = var.subnets
 }
