@@ -188,8 +188,8 @@ resource "aws_rds_cluster_instance" "this" {
   # Notes:
   # Do not set preferred_backup_window - its set at the cluster level and will error if provided here
 
-  identifier                            = var.instances_use_identifier_prefix ? null : lookup(each.value, "identifier", "${var.name}-${each.key}")
-  identifier_prefix                     = var.instances_use_identifier_prefix ? lookup(each.value, "identifier_prefix", "${var.name}-${each.key}-") : null
+  identifier                            = var.instances_use_identifier_prefix ? null : lower(lookup(each.value, "identifier", "${var.name}-${each.key}"))
+  identifier_prefix                     = var.instances_use_identifier_prefix ? lower(lookup(each.value, "identifier_prefix", "${var.name}-${each.key}-")) : null
   cluster_identifier                    = try(aws_rds_cluster.this[0].id, "")
   engine                                = var.engine
   engine_version                        = var.engine_version
