@@ -79,7 +79,7 @@ resource "aws_db_subnet_group" "this" {
 resource "aws_db_parameter_group" "this" {
   count = local.create_cluster && var.create_db_parameter_group ? 1 : 0
 
-  name        = "${var.name}-aurora-db-${var.engine}-parameter-group"
+  name        = lower("${var.name}-aurora-db-${var.engine}-parameter-group")
   family      = var.engine == "aurora-postgresql" ? "aurora-postgresql11" : "aurora-mysql5.7"
   description = "${var.name}-aurora-db-${var.engine}-parameter-group"
 }
@@ -87,7 +87,7 @@ resource "aws_db_parameter_group" "this" {
 resource "aws_rds_cluster_parameter_group" "this" {
   count = local.create_cluster && var.create_cluster_parameter_group ? 1 : 0
 
-  name        = "${var.name}-aurora-${var.engine}-cluster-parameter-group"
+  name        = lower("${var.name}-aurora-${var.engine}-cluster-parameter-group")
   family      = var.engine == "aurora-postgresql" ? "aurora-postgresql11" : "aurora-mysql5.7"
   description = "${var.name}-aurora-${var.engine}-cluster-parameter-group"
 }
