@@ -97,7 +97,7 @@ resource "aws_rds_cluster" "this" {
 
   global_cluster_identifier      = var.global_cluster_identifier
   enable_global_write_forwarding = var.enable_global_write_forwarding
-  cluster_identifier             = var.name
+  cluster_identifier             = lower(var.name)
   replication_source_identifier  = var.replication_source_identifier
   source_region                  = var.source_region
 
