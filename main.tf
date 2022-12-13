@@ -18,22 +18,18 @@ locals {
     host     = try(aws_rds_cluster.this[0].endpoint, "")
     username = var.master_username
     password = random_password.master_password.result
-    port     = var.port
+    port     = local.port
     dbname   = var.database_name
   }
   common_tenable_values = {
     engine    = var.engine
     host      = try(aws_rds_cluster.this[0].endpoint, "")
     dbname    = var.database_name
-    port      = var.port
+    port      = local.port
     masterarn = aws_secretsmanager_secret.default.arn
   }
 }
 
-# resource "random_password" "master_password" {
-#   length  = 16
-#   special = false
-# }
 
 resource "random_password" "users_password" {
   for_each = toset(var.db_users)
