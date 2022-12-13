@@ -76,5 +76,6 @@ variable "db_users" {
   type        = list(any)
   default = [
     "test-postgres",
+    "another-postgres",
   ]
 }
