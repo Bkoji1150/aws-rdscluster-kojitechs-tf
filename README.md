@@ -37,8 +37,7 @@ module "aurora" {
       promotion_tier = 15
     }
   }
-  endpoints = {
-  }
+
   vpc_id                 = local.vpc_id
   db_subnet_group_name   = local.db_subnets_names
   create_db_subnet_group = false
