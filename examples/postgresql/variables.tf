@@ -74,8 +74,5 @@ variable "vpc" {
 variable "db_users" {
   description = "List of all databases"
   type        = list(any)
-  default = [
-    "test-postgres",
-    "another-postgres",
-  ]
+ 
 }
