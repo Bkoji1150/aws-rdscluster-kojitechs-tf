@@ -13,16 +13,16 @@ locals {
   is_serverless               = var.engine_mode == "serverless"
 
   secrete_values = {
-    engine   = var.engine
+    engine   = trimsuffix(var.engine, "aurora-")
     host     = try(aws_rds_cluster.this[0].endpoint, "")
     username = var.master_username
     password = random_password.master_password.result
     port     = local.port
     dbname   = var.database_name
   }
-  
+
   common_tenable_values = {
-    engine    = var.engine
+    engine    = trimsuffix(var.engine, "aurora-")
     host      = try(aws_rds_cluster.this[0].endpoint, "")
     dbname    = var.database_name
     port      = local.port
