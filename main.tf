@@ -4,7 +4,7 @@ locals {
   db_subnet_group_name            = var.create_db_subnet_group ? join("", aws_db_subnet_group.this.*.name) : var.db_subnet_group_name
   db_parameter_group_name         = var.create_db_parameter_group ? join("", aws_db_parameter_group.this.*.id) : var.db_parameter_group_name
   db_cluster_parameter_group_name = var.create_cluster_parameter_group ? join("", aws_rds_cluster_parameter_group.this.*.id) : var.db_cluster_parameter_group_name
-
+ postgres_aurora = var.engine == "aurora-postgresql" ? 1 : 0
   master_password             = random_password.master_password.result
   lambda_description = var.rotation_type == "single" ? "Conducts an AWS SecretsManager secret rotation for RDS MySQL using single user rotation scheme" : "Conducts an AWS SecretsManager secret rotation for RDS MySQL using multi user rotation scheme"
   backtrack_window            = (var.engine == "aurora-mysql" || var.engine == "aurora") && var.engine_mode != "serverless" ? var.backtrack_window : 0
@@ -424,7 +424,7 @@ resource "aws_security_group_rule" "egress" {
 }
 
 resource "aws_security_group" "lambda_secrets_rotation_sg" {
-  count = var.engine == "aurora-postgresql" ? 1 : 0
+  count = local.postgres_aurora
   name = "lambda-secrets-${var.component_name}-sg"
   description = "Allow lambda inbound access on rds"
   vpc_id      = var.vpc_id
@@ -444,7 +444,7 @@ resource "aws_security_group" "lambda_secrets_rotation_sg" {
 }
 
 resource "aws_security_group_rule" "postgres_port_allow_ecs" {
-count = var.engine == "aurora-postgresql" ? 1 : 0
+count = local.postgres_aurora
   security_group_id        =  local.rds_security_group_id
   description              = "Allow postgres ingress access to db cluster on port ${local.port}"
   type                     = "ingress"
@@ -455,12 +455,13 @@ count = var.engine == "aurora-postgresql" ? 1 : 0
 }
 
 resource "random_pet" "this" {
-  count = var.engine == "aurora-postgresql" ? 1 : 0
+
+  count =  local.postgres_aurora
   length = 2
 }
 
 module "s3_bucket" {
-  count = var.engine == "aurora-postgresql" ? 1 : 0
+  count = local.postgres_aurora
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.0"
 
@@ -478,7 +479,7 @@ module "s3_bucket" {
 }
 
 module "lambda_function" {
-  count = var.engine == "aurora-postgresql" ? 1 : 0
+  count =local.postgres_aurora
   source = "terraform-aws-modules/lambda/aws"
 
   depends_on    = [aws_rds_cluster.this]
