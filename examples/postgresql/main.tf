@@ -49,15 +49,10 @@ module "aurora" {
   name           = local.name
   engine         = "aurora-postgresql"
   engine_version = "11.12"
-  instances = {
+   instances = {
     1 = {
       instance_class      = "db.r5.2xlarge"
       publicly_accessible = false
-    }
-    2 = {
-      identifier     = format("%s-%s", var.component_name, "writer-instance")
-      instance_class = "db.r5.large"
-      promotion_tier = 15
     }
   }
 
