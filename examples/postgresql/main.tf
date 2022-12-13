@@ -13,7 +13,7 @@ data "terraform_remote_state" "operational_shared" {
   backend = "s3"
 
   config = {
-    region = var.region
+    region = "us-east-1"
     bucket = "operational.vpc.tf.kojitechs"
     key    = format("env:/%s/path/env", "shared")
   }
