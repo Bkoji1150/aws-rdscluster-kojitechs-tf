@@ -106,8 +106,12 @@ output "enhanced_monitoring_iam_role_unique_id" {
   value       = module.aurora.enhanced_monitoring_iam_role_unique_id
 }
 
-# aws_security_group
 output "security_group_id" {
   description = "The security group ID of the cluster"
-  value       = module.aurora.security_group_id
+  value       = module.aurora.users_secrets
+}
+
+output "security_group_id" {
+  description = "The security group ID of the cluster"
+  value       = module.aurora.users_secrets_version
 }

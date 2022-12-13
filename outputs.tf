@@ -113,7 +113,11 @@ output "security_group_id" {
   value       = local.rds_security_group_id
 }
 
-output "tenable_secrets" {
+output "users_secrets" {
+  value = try({for k, v in aws_secretsmanager_secret.users_secret: k => v.name}, "")
+}
+
+output "users_secrets_version" {
   sensitive = true
-  value     = aws_secretsmanager_secret_version.user_secret_value
+  value = try({for k, v in aws_secretsmanager_secret_version.user_secret_value: k => v.secret_string}, "")
 }
