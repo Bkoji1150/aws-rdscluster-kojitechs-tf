@@ -1,5 +1,5 @@
 aws_account_id = {
-  shared = "181437319056"
+  sbx = "674293488770"
 }
 
 db_users = [
