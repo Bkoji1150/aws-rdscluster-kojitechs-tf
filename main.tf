@@ -1,57 +1,101 @@
 locals {
   create_cluster = var.create_cluster && var.putin_khuylo
-
   port                            = coalesce(var.port, (var.engine == "aurora-postgresql" ? 5432 : 3306))
   db_subnet_group_name            = var.create_db_subnet_group ? join("", aws_db_subnet_group.this.*.name) : var.db_subnet_group_name
   db_parameter_group_name         = var.create_db_parameter_group ? join("", aws_db_parameter_group.this.*.id) : var.db_parameter_group_name
   db_cluster_parameter_group_name = var.create_cluster_parameter_group ? join("", aws_rds_cluster_parameter_group.this.*.id) : var.db_cluster_parameter_group_name
 
   master_password             = random_password.master_password.result
+  lambda_description = var.rotation_type == "single" ? "Conducts an AWS SecretsManager secret rotation for RDS MySQL using single user rotation scheme" : "Conducts an AWS SecretsManager secret rotation for RDS MySQL using multi user rotation scheme"
+  filename           = var.rotation_type == "single" ? "./functions/SingleUser" : "./functions/MultiUser"
   backtrack_window            = (var.engine == "aurora-mysql" || var.engine == "aurora") && var.engine_mode != "serverless" ? var.backtrack_window : 0
   rds_enhanced_monitoring_arn = var.create_monitoring_role ? join("", aws_iam_role.rds_enhanced_monitoring.*.arn) : var.monitoring_role_arn
   rds_security_group_id       = join("", aws_security_group.this.*.id)
   is_serverless               = var.engine_mode == "serverless"
 
-  common_tenable_values = {
+  secrete_values = {
     engine   = var.engine
-    endpoint = try(aws_rds_cluster.this[0].endpoint, "")
+    host     = try(aws_rds_cluster.this[0].endpoint, "")
+    username = var.master_username
+    password = random_password.master_password.result
+    port     = var.port
     dbname   = var.database_name
-    port     = local.port
-    password = local.master_password
   }
-  reader_instance = {
-    engine   = var.engine
-    endpoint = try(aws_rds_cluster.this[0].reader_endpoint, "")
-    dbname   = var.database_name
-    port     = local.port
-    password = local.master_password
+  common_tenable_values = {
+    engine    = var.engine
+    host      = try(aws_rds_cluster.this[0].endpoint, "")
+    dbname    = var.database_name
+    port      = var.port
+    masterarn = aws_secretsmanager_secret.default.arn
   }
 }
 
-resource "aws_secretsmanager_secret" "master_secret" {
-  name_prefix             = format("%s-%s-%s", var.component_name, "Writer-endpoint", terraform.workspace)
-  description             = "secret to manage superuser ${var.master_username} on ${format("%s-%s", var.component_name, terraform.workspace)} Writer instance"
+# resource "random_password" "master_password" {
+#   length  = 16
+#   special = false
+# }
+
+resource "random_password" "users_password" {
+  for_each = toset(var.db_users)
+  length   = 16
+  special  = false
+}
+
+resource "aws_kms_key" "default" {
+  description         = "Key for Secrets Manager secret [${var.master_username}]"
+  enable_key_rotation = true
+  policy              = data.aws_iam_policy_document.kms.json
+}
+
+resource "aws_kms_alias" "default" {
+  name          = format("%s/%s", "alias", var.component_name)
+  target_key_id = aws_kms_key.default.key_id
+}
+
+
+resource "aws_secretsmanager_secret" "default" {
+  name_prefix = "${var.component_name}-${var.master_username}-"
+  description = "Username and password for RDS user ${var.master_username} on ${aws_rds_cluster.this[0].id}"
+  kms_key_id  = aws_kms_key.default.key_id
+}
+
+resource "aws_secretsmanager_secret" "users_secret" {
+
+  for_each                = toset(keys(random_password.users_password))
+  name_prefix             = format("%s-%s-", var.component_name, each.key)
+  description             = "secret to manage user credential of ${each.key} on ${format("%s-%s", var.component_name, terraform.workspace)} instance"
   recovery_window_in_days = 0
+  kms_key_id              = aws_kms_key.default.key_id
 }
 
 resource "aws_secretsmanager_secret_version" "master_secret_value" {
-  secret_id     = aws_secretsmanager_secret.master_secret.id
-  secret_string = jsonencode(merge(local.common_tenable_values, { username = var.master_username, password = random_password.master_password.result }))
+  secret_id     = aws_secretsmanager_secret.default.id
+  secret_string = jsonencode(local.secrete_values)
 }
 
-resource "aws_secretsmanager_secret" "master_secret_readenpoints" {
-  name_prefix             = format("%s-%s", var.component_name, "Reader-endpoint")
-  description             = "Secret to manage superuser ${var.master_username} on ${format("%s-%s", var.component_name, terraform.workspace)} Reader instance"
-  recovery_window_in_days = 0
+# Secrets Manager for all application users that requires a password 
+resource "aws_secretsmanager_secret_version" "user_secret_value" {
+  depends_on = [
+    aws_secretsmanager_secret_version.master_secret_value
+  ]
+
+  for_each      = toset(keys(aws_secretsmanager_secret.users_secret))
+  secret_id     = aws_secretsmanager_secret.users_secret[each.key].id
+  secret_string = jsonencode(merge(local.common_tenable_values, { username = each.key, password = random_password.users_password[each.key].result }))
 }
 
-resource "aws_secretsmanager_secret_version" "master_secret_value_readenpoints" {
-  secret_id     = aws_secretsmanager_secret.master_secret_readenpoints.id
-  secret_string = jsonencode(merge(local.reader_instance, { username = var.master_username, password = random_password.master_password.result }))
+resource "aws_secretsmanager_secret_rotation" "multiuser_sercrets" {
+  depends_on = [
+    aws_secretsmanager_secret_version.master_secret_value
+  ]
+  for_each = toset(keys(aws_secretsmanager_secret.users_secret))
+
+  secret_id           = aws_secretsmanager_secret.users_secret[each.key].id
+  rotation_lambda_arn = module.lambda_function[0].lambda_function_arn
+  rotation_rules {
+    automatically_after_days = var.rotation_days
+  }
 }
-
-data "aws_partition" "current" {}
-
 resource "random_password" "master_password" {
   length  = 16
   special = false
@@ -382,4 +426,94 @@ resource "aws_security_group_rule" "egress" {
   ipv6_cidr_blocks         = lookup(each.value, "ipv6_cidr_blocks", null)
   prefix_list_ids          = lookup(each.value, "prefix_list_ids", null)
   source_security_group_id = lookup(each.value, "source_security_group_id", null)
+}
+
+resource "aws_security_group" "lambda_secrets_rotation_sg" {
+  count = var.engine == "aurora-postgresql" ? 1 : 0
+  name = "lambda-secrets-${var.component_name}-sg"
+  description = "Allow lambda inbound access on rds"
+  vpc_id      = var.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name = "lambda-secrets-${var.component_name}-sg"
+  }
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_security_group_rule" "postgres_port_allow_ecs" {
+count = var.engine == "aurora-postgresql" ? 1 : 0
+  security_group_id        =  local.rds_security_group_id
+  description              = "Allow postgres ingress access to db cluster on port ${local.port}"
+  type                     = "ingress"
+  from_port                = local.port
+  to_port                  = local.port
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.lambda_secrets_rotation_sg[0].id
+}
+
+resource "random_pet" "this" {
+  count = var.engine == "aurora-postgresql" ? 1 : 0
+  length = 2
+}
+
+module "s3_bucket" {
+  count = var.engine == "aurora-postgresql" ? 1 : 0
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> 3.0"
+
+  bucket_prefix = "${random_pet.this[0].id}-"
+  force_destroy = true
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
+  versioning = {
+    enabled = true
+  }
+}
+
+module "lambda_function" {
+  count = var.engine == "aurora-postgresql" ? 1 : 0
+  source = "terraform-aws-modules/lambda/aws"
+
+  depends_on    = [aws_rds_cluster.this]
+  function_name = "${var.component_name}-function"
+  description   = local.lambda_description
+  handler       = "lambda_function.lambda_handler"
+  runtime       = var.runtime 
+  publish       = true
+  timeout       = var.timeout
+
+  lambda_role = aws_iam_role.default.arn
+  create_role = false
+  source_path = local.filename
+  store_on_s3 = true
+  s3_bucket   = module.s3_bucket[0].s3_bucket_id
+
+  environment_variables = {
+    SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${data.aws_region.current.name}.amazonaws.com",
+    SLACK_WEBHOOK_ENDPOINT   = var.slack_token
+  }
+  allowed_triggers = {
+    ScanAmiRule = {
+      principal    = "secretsmanager.amazonaws.com"
+      statement_id = "AllowExecutionSecretManager"
+    }
+  }
+  vpc_subnet_ids         = var.subnets
+  vpc_security_group_ids = [aws_security_group.lambda_secrets_rotation_sg[0].id]
+
+  tags = {
+    Module = "${var.component_name}-function"
+  }
 }

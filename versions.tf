@@ -1,15 +1,16 @@
-/*
-  terraform {
-  required_version = "~> 1.1.15"
-  required_providers {
 
+  terraform {
+  required_version = ">=v1.2.1"
+
+     required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 4.0"
     }
     postgresql = {
-      source = "cyrilgdn/postgresql"
+      source  = "cyrilgdn/postgresql"
+      version = "1.18.0"
     }
   }
 }
-*/
+

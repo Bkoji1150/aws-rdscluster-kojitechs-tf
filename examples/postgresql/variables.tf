@@ -2,10 +2,7 @@
 variable "aws_account_id" {
   description = "Environment this template would be deployed to"
   type        = map(string)
-  default = {
-    prod = "735972722491"
-    sbx  = "674293488770"
-  }
+
 }
 
 variable "application_owner" {
@@ -72,4 +69,12 @@ variable "vpc" {
   description = "The VPC the resource resides in. We need this to differentiate from Lifecycle Environment due to INFRA and SEC. One of \"APP\", \"INFRA\", \"SEC\", \"ROUTING\"."
   type        = string
   default     = "APP"
+}
+
+variable "db_users" {
+  description = "List of all databases"
+  type        = list(any)
+  default = [
+    "test-postgres",
+  ]
 }

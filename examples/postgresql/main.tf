@@ -1,16 +1,23 @@
 
-locals {
-  name = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
-}
-
 data "terraform_remote_state" "operational_environment" {
   backend = "s3"
 
   config = {
     region = "us-east-1"
     bucket = "operational.vpc.tf.kojitechs"
-    key    = format("env:/%s/path/env", lower(terraform.workspace))
+    key    = format("env:/%s/path/env", terraform.workspace)
   }
+}
+
+locals {
+  name = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
+  operational_state    = data.terraform_remote_state.operational_environment.outputs
+  vpc_id               = local.operational_state.vpc_id
+  public_subnet_ids    = local.operational_state.public_subnets
+  private_subnets_ids  = local.operational_state.private_subnets
+  public_subnets_cidrs = local.operational_state.public_subnet_cidr_block
+  db_subnets_names     = local.operational_state.db_subnets_names
+  private_sunbet_cidrs = local.operational_state.private_subnets_cidrs
 }
 
 module "required_tags" {
@@ -30,17 +37,6 @@ module "required_tags" {
   component_name          = var.component_name
 }
 
-locals {
-  operational_state    = data.terraform_remote_state.operational_environment.outputs
-  vpc_id               = local.operational_state.vpc_id
-  public_subnet_ids    = local.operational_state.public_subnets
-  private_subnets_ids  = local.operational_state.private_subnets
-  public_subnets_cidrs = local.operational_state.public_subnet_cidr_block
-  db_subnets_names     = local.operational_state.db_subnets_names
-  private_sunbet_cidrs = local.operational_state.private_subnets_cidrs
-}
-
-
 ################################################################################
 # RDS Aurora Module
 ################################################################################
@@ -49,6 +45,7 @@ module "aurora" {
   source = "../../"
 
   component_name = var.component_name
+  slack_token         = jsondecode(local.operational_state.secrets_version.slacktoken)["slacktoken"]
   name           = local.name
   engine         = "aurora-postgresql"
   engine_version = "11.12"
@@ -63,8 +60,7 @@ module "aurora" {
       promotion_tier = 15
     }
   }
-  endpoints = {
-  }
+
   vpc_id                 = local.vpc_id
   db_subnet_group_name   = local.db_subnets_names
   create_db_subnet_group = false
@@ -79,11 +75,11 @@ module "aurora" {
     }
   }
   iam_database_authentication_enabled = true
-
   apply_immediately   = true
   skip_final_snapshot = true
 
   enabled_cloudwatch_logs_exports = ["postgresql"]
   database_name                   = "postgres_aurora"
   master_username                 = var.master_username
+  db_users                        = var.db_users
 }

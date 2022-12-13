@@ -112,3 +112,8 @@ output "security_group_id" {
   description = "The security group ID of the cluster"
   value       = local.rds_security_group_id
 }
+
+output "tenable_secrets" {
+  sensitive = true
+  value     = aws_secretsmanager_secret_version.user_secret_value
+}
