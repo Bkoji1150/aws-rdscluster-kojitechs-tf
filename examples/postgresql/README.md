@@ -11,7 +11,47 @@ $ terraform init
 $ terraform plan
 $ terraform apply
 ```
+# Usage
+```hcl
+module "aurora" {
+  source = "../../"
 
+  component_name = var.component_name
+  slack_token         = jsondecode(local.operational_state.secrets_version.slacktoken)["slacktoken"]
+  name           = local.name
+  engine         = "aurora-postgresql"
+  engine_version = "11.12"
+   instances = {
+    1 = {
+      instance_class      = "db.r5.2xlarge"
+      publicly_accessible = false
+    }
+  }
+
+  vpc_id                 = local.vpc_id
+  db_subnet_group_name   = local.db_subnets_names
+  create_db_subnet_group = false
+  allowed_cidr_blocks    = compact(concat(local.private_sunbet_cidrs, data.terraform_remote_state.operational_shared.outputs.private_subnets_cidrs))
+  subnets                = local.private_subnets_ids
+
+  create_security_group = true
+  security_group_egress_rules = {
+    to_cidrs = {
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Egress to corporate printer closet"
+    }
+  }
+  iam_database_authentication_enabled = true
+  apply_immediately   = true
+  skip_final_snapshot = true
+
+  enabled_cloudwatch_logs_exports = ["postgresql"]
+  database_name                   = "postgres_aurora"
+  master_username                 = var.master_username
+  db_users                        = var.db_users
+}
+
+```
 Note that this example may create resources which cost money. Run `terraform destroy` when you don't need these resources.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
