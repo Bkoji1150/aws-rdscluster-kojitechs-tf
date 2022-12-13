@@ -7,7 +7,6 @@ locals {
 
   master_password             = random_password.master_password.result
   lambda_description = var.rotation_type == "single" ? "Conducts an AWS SecretsManager secret rotation for RDS MySQL using single user rotation scheme" : "Conducts an AWS SecretsManager secret rotation for RDS MySQL using multi user rotation scheme"
-  filename           = var.rotation_type == "single" ? "./functions/SingleUser" : "./functions/MultiUser"
   backtrack_window            = (var.engine == "aurora-mysql" || var.engine == "aurora") && var.engine_mode != "serverless" ? var.backtrack_window : 0
   rds_enhanced_monitoring_arn = var.create_monitoring_role ? join("", aws_iam_role.rds_enhanced_monitoring.*.arn) : var.monitoring_role_arn
   rds_security_group_id       = join("", aws_security_group.this.*.id)
@@ -21,6 +20,7 @@ locals {
     port     = local.port
     dbname   = var.database_name
   }
+  
   common_tenable_values = {
     engine    = var.engine
     host      = try(aws_rds_cluster.this[0].endpoint, "")
@@ -29,7 +29,6 @@ locals {
     masterarn = aws_secretsmanager_secret.default.arn
   }
 }
-
 
 resource "random_password" "users_password" {
   for_each = toset(var.db_users)
@@ -492,7 +491,7 @@ module "lambda_function" {
 
   lambda_role = aws_iam_role.default.arn
   create_role = false
-  source_path = local.filename
+  source_path = "${path.module}/functions/MultiUser"
   store_on_s3 = true
   s3_bucket   = module.s3_bucket[0].s3_bucket_id
 

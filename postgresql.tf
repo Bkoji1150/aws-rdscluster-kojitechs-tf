@@ -1,15 +1,11 @@
 
-data "aws_secretsmanager_secret_version" "this" {
-  secret_id = aws_secretsmanager_secret.default.id
-}
-
 provider "postgresql" {
 
   alias            = "pgconnect"
   host             = try(aws_rds_cluster.this[0].endpoint, "")
   port             = var.port
   username         = var.master_username
-  password         = jsondecode(data.aws_secretsmanager_secret_version.this.secret_string)["password"]
+  password         = jsondecode(aws_secretsmanager_secret_version.master_secret_value.secret_string)["password"]
   superuser        = false
   sslmode          = "require"
   expected_version = try(aws_rds_cluster.this[0].engine_version_actual, "")

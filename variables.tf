@@ -545,8 +545,6 @@ variable "runtime" {
   default = "python3.9"
 }
 
-
-
 variable "db_users_privileges" {
   description = <<-EOT
   If a user in this map does not also exist in the db_users list, it will be ignored.
