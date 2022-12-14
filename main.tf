@@ -379,6 +379,41 @@ resource "aws_security_group" "this" {
   tags = merge(var.tags, var.security_group_tags, { Name = var.name })
 }
 
+resource "aws_security_group" "lambda_sg" {
+ 
+  name_prefix = "${var.component_name}-lambda-sg-"
+  vpc_id      = var.vpc_id
+  description = coalesce(var.security_group_description, "lambda traffic to/from RDS Aurora ${var.name}")
+
+  tags = merge(var.tags, var.security_group_tags, { Name = var.component_name })
+}
+
+# TODO - change to map of ingress rules under one resource at next breaking change
+resource "aws_security_group_rule" "lambda-ingress-traffic" {
+
+  description = "Allow ingress access from lambda to db sg"
+
+  type                     = "ingress"
+  from_port                = local.port
+  to_port                  = local.port
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.lambda_sg.id
+  security_group_id        = local.rds_security_group_id
+}
+
+# TODO - change to map of ingress rules under one resource at next breaking change
+resource "aws_security_group_rule" "lambda-egress-traffic" {
+
+  description = "Allow egress access from lambda to db sg"
+
+  type                     = "egress"
+  from_port                = local.port
+  to_port                  = local.port
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.lambda_sg.id
+  security_group_id        = local.rds_security_group_id
+}
+
 # TODO - change to map of ingress rules under one resource at next breaking change
 resource "aws_security_group_rule" "default_ingress" {
   count = local.create_cluster && var.create_security_group ? length(var.allowed_security_groups) : 0
@@ -423,43 +458,11 @@ resource "aws_security_group_rule" "egress" {
   source_security_group_id = lookup(each.value, "source_security_group_id", null)
 }
 
-resource "aws_security_group" "lambda_secrets_rotation_sg" {
-
-  name = "lambda-secrets-${var.component_name}-sg"
-  description = "Allow lambda inbound access on rds"
-  vpc_id      = var.vpc_id
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "lambda-secrets-${var.component_name}-sg"
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_security_group_rule" "postgres_port_allow_ecs" {
-
-  security_group_id        =  local.rds_security_group_id
-  description              = "Allow lambda ingress access to db cluster on port ${local.port}"
-  type                     = "ingress"
-  from_port                = local.port
-  to_port                  = local.port
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.lambda_secrets_rotation_sg.id
-}
-
 resource "random_pet" "this" {
   length = 2
 }
 
 module "s3_bucket" {
-
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.0"
 
@@ -504,7 +507,7 @@ module "lambda_function" {
     }
   }
   vpc_subnet_ids         = var.subnets
-  vpc_security_group_ids = [aws_security_group.lambda_secrets_rotation_sg.id]
+  vpc_security_group_ids = [aws_security_group.lambda_sg.id]
 
   tags = {
     Module = "${var.component_name}-function"

@@ -1,0 +1,1 @@
+{"filename": "builds/7a1dc659136bfce23e4eb1f97dfd79ac580c875960fb6f9739e4392c442f3d2c.zip", "runtime": "python3.9", "artifacts_dir": "builds", "build_plan": [["zip", "../../functions/MultiUser", null]]}
