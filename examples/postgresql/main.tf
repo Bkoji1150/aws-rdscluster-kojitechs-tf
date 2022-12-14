@@ -60,10 +60,10 @@ module "aurora" {
   engine         = "aurora-postgresql"
   engine_version = "11.12"
    instances = {
-    1 = {
-      instance_class      = "db.r5.2xlarge"
-      publicly_accessible = false
-    }
+    # 1 = {
+    #   instance_class      = "db.r5.2xlarge"
+    #   publicly_accessible = false
+    # }
   }
 
   vpc_id                 = local.vpc_id
