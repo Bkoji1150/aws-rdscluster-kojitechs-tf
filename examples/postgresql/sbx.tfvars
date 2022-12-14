@@ -2,7 +2,7 @@ aws_account_id = {
   sbx = "674293488770"
 }
 
-db_users = [
-  "kojitechskart",
-  "test",
-]
+# db_users = [
+#   "kojitechskart",
+#   "test",
+# ]
