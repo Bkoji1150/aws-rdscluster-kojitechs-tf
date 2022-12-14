@@ -392,6 +392,9 @@ resource "aws_security_group" "lambda_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = merge(var.tags, var.security_group_tags, { Name = "${var.component_name}-lambda-sg" })
+    lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # TODO - change to map of ingress rules under one resource at next breaking change
