@@ -391,7 +391,7 @@ resource "aws_security_group" "lambda_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = merge(var.tags, var.security_group_tags, { Name = var.component_name })
+  tags = "${var.component_name}-lambda-sg"
 }
 
 # TODO - change to map of ingress rules under one resource at next breaking change
