@@ -384,7 +384,12 @@ resource "aws_security_group" "lambda_sg" {
   name_prefix = "${var.component_name}-lambda-sg-"
   vpc_id      = var.vpc_id
   description = coalesce(var.security_group_description, "lambda traffic to/from RDS Aurora ${var.name}")
-
+   egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   tags = merge(var.tags, var.security_group_tags, { Name = var.component_name })
 }
 
@@ -394,23 +399,10 @@ resource "aws_security_group_rule" "lambda-ingress-traffic" {
   description = "Allow ingress access from lambda to db sg"
 
   type                     = "ingress"
-  from_port                = local.port
-  to_port                  = local.port
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.lambda_sg.id
-  security_group_id        = local.rds_security_group_id
-}
-
-# TODO - change to map of ingress rules under one resource at next breaking change
-resource "aws_security_group_rule" "lambda-egress-traffic" {
-
-  description = "Allow egress access from lambda to db sg"
-
-  type                     = "egress"
-  from_port                = local.port
-  to_port                  = local.port
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.lambda_sg.id
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  self = true
   security_group_id        = local.rds_security_group_id
 }
 
