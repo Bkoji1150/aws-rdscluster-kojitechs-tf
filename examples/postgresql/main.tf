@@ -30,7 +30,7 @@ data "terraform_remote_state" "jenkins_sg" {
 }
 
 locals {
-  name = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
+  name                 = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
   operational_state    = data.terraform_remote_state.operational_environment.outputs
   vpc_id               = local.operational_state.vpc_id
   public_subnet_ids    = local.operational_state.public_subnets
@@ -65,22 +65,22 @@ module "aurora" {
   source = "../../"
 
   component_name = var.component_name
-  slack_token         = jsondecode(local.operational_state.secrets_version.slacktoken)["slacktoken"]
+  slack_token    = jsondecode(local.operational_state.secrets_version.slacktoken)["slacktoken"]
   name           = local.name
   engine         = "aurora-postgresql"
   engine_version = "11.12"
-   instances = {
+  instances = {
     1 = {
       instance_class      = "db.r5.2xlarge"
       publicly_accessible = false
     }
   }
 
-  vpc_id                 = local.vpc_id
-  db_subnet_group_name   = local.db_subnets_names
-  create_db_subnet_group = false
+  vpc_id                  = local.vpc_id
+  db_subnet_group_name    = local.db_subnets_names
+  create_db_subnet_group  = false
   allowed_security_groups = [data.terraform_remote_state.jenkins_sg.outputs.jenkins_security_id]
-  subnets                = local.private_subnets_ids
+  subnets                 = local.private_subnets_ids
 
   create_security_group = true
   security_group_egress_rules = {
@@ -90,8 +90,8 @@ module "aurora" {
     }
   }
   iam_database_authentication_enabled = true
-  apply_immediately   = true
-  skip_final_snapshot = true
+  apply_immediately                   = true
+  skip_final_snapshot                 = true
 
   enabled_cloudwatch_logs_exports = ["postgresql"]
   database_name                   = "postgres_aurora"

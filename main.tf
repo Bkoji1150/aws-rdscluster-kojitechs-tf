@@ -1,16 +1,16 @@
 locals {
-  create_cluster = var.create_cluster && var.putin_khuylo
+  create_cluster                  = var.create_cluster && var.putin_khuylo
   port                            = coalesce(var.port, (var.engine == "aurora-postgresql" ? 5432 : 3306))
   db_subnet_group_name            = var.create_db_subnet_group ? join("", aws_db_subnet_group.this.*.name) : var.db_subnet_group_name
   db_parameter_group_name         = var.create_db_parameter_group ? join("", aws_db_parameter_group.this.*.id) : var.db_parameter_group_name
   db_cluster_parameter_group_name = var.create_cluster_parameter_group ? join("", aws_rds_cluster_parameter_group.this.*.id) : var.db_cluster_parameter_group_name
- postgres_aurora = var.engine == "aurora-postgresql" ? 1 : 0
-  master_password             = random_password.master_password.result
-  lambda_description = var.rotation_type == "single" ? "Conducts an AWS SecretsManager secret rotation for RDS MySQL using single user rotation scheme" : "Conducts an AWS SecretsManager secret rotation for RDS MySQL using multi user rotation scheme"
-  backtrack_window            = (var.engine == "aurora-mysql" || var.engine == "aurora") && var.engine_mode != "serverless" ? var.backtrack_window : 0
-  rds_enhanced_monitoring_arn = var.create_monitoring_role ? join("", aws_iam_role.rds_enhanced_monitoring.*.arn) : var.monitoring_role_arn
-  rds_security_group_id       = join("", aws_security_group.this.*.id)
-  is_serverless               = var.engine_mode == "serverless"
+  postgres_aurora                 = var.engine == "aurora-postgresql" ? 1 : 0
+  master_password                 = random_password.master_password.result
+  lambda_description              = var.rotation_type == "single" ? "Conducts an AWS SecretsManager secret rotation for RDS MySQL using single user rotation scheme" : "Conducts an AWS SecretsManager secret rotation for RDS MySQL using multi user rotation scheme"
+  backtrack_window                = (var.engine == "aurora-mysql" || var.engine == "aurora") && var.engine_mode != "serverless" ? var.backtrack_window : 0
+  rds_enhanced_monitoring_arn     = var.create_monitoring_role ? join("", aws_iam_role.rds_enhanced_monitoring.*.arn) : var.monitoring_role_arn
+  rds_security_group_id           = join("", aws_security_group.this.*.id)
+  is_serverless                   = var.engine_mode == "serverless"
 
   secrete_values = {
     engine   = "postgres"
@@ -380,30 +380,23 @@ resource "aws_security_group" "this" {
 }
 
 resource "aws_security_group" "lambda_sg" {
- 
+
   name_prefix = "${var.component_name}-lambda-sg-"
   vpc_id      = var.vpc_id
   description = coalesce(var.security_group_description, "lambda traffic to/from RDS Aurora ${var.name}")
-   egress {
+  ingress {
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    self      = true
+  }
+  egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = merge(var.tags, var.security_group_tags, { Name = var.component_name })
-}
-
-# TODO - change to map of ingress rules under one resource at next breaking change
-resource "aws_security_group_rule" "lambda-ingress-traffic" {
-
-  description = "Allow ingress access from lambda to db sg"
-
-  type                     = "ingress"
-  from_port                = 0
-  to_port                  = 0
-  protocol                 = "-1"
-  self = true
-  security_group_id        = local.rds_security_group_id
 }
 
 # TODO - change to map of ingress rules under one resource at next breaking change
@@ -478,7 +471,7 @@ module "lambda_function" {
   function_name = "${var.component_name}-function"
   description   = local.lambda_description
   handler       = "lambda_function.lambda_handler"
-  runtime       = var.runtime 
+  runtime       = var.runtime
   publish       = true
   timeout       = var.timeout
 

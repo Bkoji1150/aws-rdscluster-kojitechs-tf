@@ -114,10 +114,10 @@ output "security_group_id" {
 }
 
 output "users_secrets" {
-  value = try({for k, v in aws_secretsmanager_secret.users_secret: k => v.name}, "")
+  value = try({ for k, v in aws_secretsmanager_secret.users_secret : k => v.name }, "")
 }
 
 output "users_secrets_version" {
   sensitive = true
-  value = try({for k, v in aws_secretsmanager_secret_version.user_secret_value: k => v.secret_string}, "")
+  value     = try({ for k, v in aws_secretsmanager_secret_version.user_secret_value : k => v.secret_string }, "")
 }

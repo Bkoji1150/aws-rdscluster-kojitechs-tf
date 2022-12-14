@@ -540,9 +540,9 @@ variable "slackwebhook_url" {
 }
 
 variable "runtime" {
-  type = string
+  type        = string
   description = "(optional) describe your variable"
-  default = "python3.9"
+  default     = "python3.9"
 }
 
 variable "db_users_privileges" {
@@ -631,7 +631,7 @@ variable "schemas_list_owners" {
 }
 
 variable "slack_token" {
-  type = string
+  type        = string
   description = "(optional) describe your variable"
-  default = ""
+  default     = ""
 }

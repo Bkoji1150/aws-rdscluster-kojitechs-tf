@@ -14,7 +14,7 @@ provider "postgresql" {
 
 resource "postgresql_database" "postgres" {
 
-  for_each          = var.engine == "aurora-postgresql"  ? toset(var.databases_created) : []
+  for_each          = var.engine == "aurora-postgresql" ? toset(var.databases_created) : []
   provider          = postgresql.pgconnect
   name              = each.key
   allow_connections = true
@@ -25,7 +25,7 @@ resource "postgresql_schema" "my_schema" {
   for_each = {
     for schema, value in var.schemas_list_owners : schema => value
     if var.engine == "aurora-postgresql"
-} 
+  }
   provider = postgresql.pgconnect
   name     = each.value.onwer == "database" || each.value.database == "schema" ? null : each.value.name_of_theschema
   owner    = each.value.onwer
@@ -47,7 +47,7 @@ resource "postgresql_schema" "my_schema" {
 resource "postgresql_role" "users" {
 
   provider   = postgresql.pgconnect
-  for_each   =  var.engine == "aurora-postgresql"  ?  toset(var.db_users): []
+  for_each   = var.engine == "aurora-postgresql" ? toset(var.db_users) : []
   name       = each.key
   login      = true
   password   = jsondecode(aws_secretsmanager_secret_version.user_secret_value[each.value].secret_string)["password"]
@@ -57,7 +57,7 @@ resource "postgresql_role" "users" {
 resource "postgresql_grant" "user_privileges" {
   for_each = {
     for idx, user_privileges in var.db_users_privileges : idx => user_privileges
-    if contains(var.db_users, user_privileges.user) &&  var.engine == "aurora-postgresql"
+    if contains(var.db_users, user_privileges.user) && var.engine == "aurora-postgresql"
   }
 
   database    = each.value.database

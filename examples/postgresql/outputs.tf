@@ -112,7 +112,7 @@ output "users_secrets" {
 }
 
 output "users_secrets_version" {
-  sensitive = true
+  sensitive   = true
   description = "The security group ID of the cluster"
   value       = module.aurora.users_secrets_version
 }
