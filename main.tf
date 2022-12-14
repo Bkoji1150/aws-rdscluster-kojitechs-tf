@@ -446,7 +446,7 @@ resource "aws_security_group" "lambda_secrets_rotation_sg" {
 resource "aws_security_group_rule" "postgres_port_allow_ecs" {
 count = local.postgres_aurora
   security_group_id        =  local.rds_security_group_id
-  description              = "Allow postgres ingress access to db cluster on port ${local.port}"
+  description              = "Allow lambda ingress access to db cluster on port ${local.port}"
   type                     = "ingress"
   from_port                = local.port
   to_port                  = local.port
