@@ -394,6 +394,17 @@ resource "aws_security_group" "lambda_sg" {
   tags = merge(var.tags, var.security_group_tags, { Name =  "${var.component_name}-lambda-sg" })
 }
 
+resource "aws_security_group_rule" "lambda_ingress" {
+  description = "Allow lambda ingree access on port ${local.port}"
+
+  type              = "ingress"
+  from_port         = local.port
+  to_port           = local.port
+  protocol          = "tcp"
+  source_security_group_id       = aws_security_group.lambda_sg.id
+  security_group_id = local.rds_security_group_id
+}
+
 # TODO - change to map of ingress rules under one resource at next breaking change
 resource "aws_security_group_rule" "default_ingress" {
   count = local.create_cluster && var.create_security_group ? length(var.allowed_security_groups) : 0
@@ -418,7 +429,7 @@ resource "aws_security_group_rule" "cidr_ingress" {
   from_port         = local.port
   to_port           = local.port
   protocol          = "tcp"
-  cidr_blocks       = var.allowed_cidr_blocks
+  source_security_group_id       = var.allowed_cidr_blocks
   security_group_id = local.rds_security_group_id
 }
 
