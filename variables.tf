@@ -518,7 +518,7 @@ variable "component_name" {
 variable "timeout" {
   description = "The amount of time your Lambda Function has to run in seconds."
   type        = number
-  default     = 300
+  default     = 40
 }
 
 variable "rotation_type" {

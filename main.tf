@@ -381,7 +381,7 @@ resource "aws_security_group" "this" {
 
 resource "aws_security_group" "lambda_sg" {
 
-  name_prefix = "${var.component_name}-lambda-sg-"
+  name_prefix = "lambda-sg-${var.component_name}-"
   vpc_id      = var.vpc_id
   description = coalesce(var.security_group_description, "lambda traffic to/from RDS Aurora ${var.name}")
 
