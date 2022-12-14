@@ -384,6 +384,13 @@ resource "aws_security_group" "lambda_sg" {
   name_prefix = "${var.component_name}-lambda-sg-"
   vpc_id      = var.vpc_id
   description = coalesce(var.security_group_description, "lambda traffic to/from RDS Aurora ${var.name}")
+  
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self = true
+  }
 
   egress {
     from_port   = 0

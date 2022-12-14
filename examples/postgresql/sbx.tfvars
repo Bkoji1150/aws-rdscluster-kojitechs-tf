@@ -3,5 +3,6 @@ aws_account_id = {
 }
 
 db_users = [
-  "kojitechskart"
+  "kojitechskart",
+  "test"
 ]
