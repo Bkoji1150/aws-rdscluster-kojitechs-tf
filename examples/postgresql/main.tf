@@ -80,6 +80,7 @@ module "aurora" {
   db_subnet_group_name    = local.db_subnets_names
   create_db_subnet_group  = false
   allowed_security_groups = [data.terraform_remote_state.jenkins_sg.outputs.jenkins_security_id]
+  allowed_cidr_blocks = local.private_sunbet_cidrs
   subnets                 = local.private_subnets_ids
 
   create_security_group = true

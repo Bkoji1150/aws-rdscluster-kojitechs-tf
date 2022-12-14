@@ -539,12 +539,6 @@ variable "slackwebhook_url" {
   default     = "SLACK_WEBHOOK_ENDPOINT"
 }
 
-variable "runtime" {
-  type        = string
-  description = "(optional) describe your variable"
-  default     = "python3.9"
-}
-
 variable "db_users_privileges" {
   description = <<-EOT
   If a user in this map does not also exist in the db_users list, it will be ignored.
