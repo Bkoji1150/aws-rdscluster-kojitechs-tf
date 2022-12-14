@@ -103,7 +103,7 @@ data "aws_iam_policy_document" "SecretsManagerPostgresQlRotationMultiUserRolePol
     condition {
       test     = "StringEquals"
       variable = "secretsmanager:resource/AllowRotationLambdaArn"
-      values   = ["arn:${data.aws_partition.current.partition}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${module.lambda_function[0].lambda_function_name}"]
+      values   = ["arn:${data.aws_partition.current.partition}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${module.lambda_function.lambda_function_name}"]
     }
 
     resources = [
@@ -128,7 +128,7 @@ data "aws_iam_policy_document" "SecretsManagerPostgresQlRotationSingleUserRolePo
     condition {
       test     = "StringEquals"
       variable = "secretsmanager:resource/AllowRotationLambdaArn"
-      values   = ["arn:${data.aws_partition.current.partition}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${module.lambda_function[0].lambda_function_name}"]
+      values   = ["arn:${data.aws_partition.current.partition}:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${module.lambda_function.lambda_function_name}"]
     }
     resources = [
       "arn:${data.aws_partition.current.partition}:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:*",

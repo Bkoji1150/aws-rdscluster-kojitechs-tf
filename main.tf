@@ -86,7 +86,7 @@ resource "aws_secretsmanager_secret_rotation" "multiuser_sercrets" {
   for_each = toset(keys(aws_secretsmanager_secret.users_secret))
 
   secret_id           = aws_secretsmanager_secret.users_secret[each.key].id
-  rotation_lambda_arn = module.lambda_function[0].lambda_function_arn
+  rotation_lambda_arn = module.lambda_function.lambda_function_arn
   rotation_rules {
     automatically_after_days = var.rotation_days
   }
@@ -424,7 +424,7 @@ resource "aws_security_group_rule" "egress" {
 }
 
 resource "aws_security_group" "lambda_secrets_rotation_sg" {
-  count = local.postgres_aurora
+
   name = "lambda-secrets-${var.component_name}-sg"
   description = "Allow lambda inbound access on rds"
   vpc_id      = var.vpc_id
@@ -444,28 +444,26 @@ resource "aws_security_group" "lambda_secrets_rotation_sg" {
 }
 
 resource "aws_security_group_rule" "postgres_port_allow_ecs" {
-count = local.postgres_aurora
+
   security_group_id        =  local.rds_security_group_id
   description              = "Allow lambda ingress access to db cluster on port ${local.port}"
   type                     = "ingress"
   from_port                = local.port
   to_port                  = local.port
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.lambda_secrets_rotation_sg[0].id
+  source_security_group_id = aws_security_group.lambda_secrets_rotation_sg.id
 }
 
 resource "random_pet" "this" {
-
-  count =  local.postgres_aurora
   length = 2
 }
 
 module "s3_bucket" {
-  count = local.postgres_aurora
+
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "~> 3.0"
 
-  bucket_prefix = "${random_pet.this[0].id}-"
+  bucket_prefix = "${random_pet.this.id}-"
   force_destroy = true
 
   block_public_acls       = true
@@ -479,7 +477,6 @@ module "s3_bucket" {
 }
 
 module "lambda_function" {
-  count =local.postgres_aurora
   source = "terraform-aws-modules/lambda/aws"
 
   depends_on    = [aws_rds_cluster.this]
@@ -494,7 +491,7 @@ module "lambda_function" {
   create_role = false
   source_path = "${path.module}/functions/MultiUser"
   store_on_s3 = true
-  s3_bucket   = module.s3_bucket[0].s3_bucket_id
+  s3_bucket   = module.s3_bucket.s3_bucket_id
 
   environment_variables = {
     SECRETS_MANAGER_ENDPOINT = "https://secretsmanager.${data.aws_region.current.name}.amazonaws.com",
@@ -507,7 +504,7 @@ module "lambda_function" {
     }
   }
   vpc_subnet_ids         = var.subnets
-  vpc_security_group_ids = [aws_security_group.lambda_secrets_rotation_sg[0].id]
+  vpc_security_group_ids = [aws_security_group.lambda_secrets_rotation_sg.id]
 
   tags = {
     Module = "${var.component_name}-function"

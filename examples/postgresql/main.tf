@@ -19,6 +19,16 @@ data "terraform_remote_state" "operational_shared" {
   }
 }
 
+data "terraform_remote_state" "jenkins_sg" {
+  backend = "s3"
+
+  config = {
+    region = "us-east-1"
+    bucket = "kojitechs.aws.eks.with.terraform.tf"
+    key    = format("env:/%s/path/env/deploysingle", "shared")
+  }
+}
+
 locals {
   name = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
   operational_state    = data.terraform_remote_state.operational_environment.outputs
@@ -60,16 +70,16 @@ module "aurora" {
   engine         = "aurora-postgresql"
   engine_version = "11.12"
    instances = {
-    # 1 = {
-    #   instance_class      = "db.r5.2xlarge"
-    #   publicly_accessible = false
-    # }
+    1 = {
+      instance_class      = "db.r5.2xlarge"
+      publicly_accessible = false
+    }
   }
 
   vpc_id                 = local.vpc_id
   db_subnet_group_name   = local.db_subnets_names
   create_db_subnet_group = false
-  allowed_cidr_blocks    = ["0.0.0.0/0"]
+  allowed_security_groups = [data.terraform_remote_state.jenkins_sg.outputs.jenkins_security_id]
   subnets                = local.private_subnets_ids
 
   create_security_group = true
