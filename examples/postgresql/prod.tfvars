@@ -1,5 +1,5 @@
 aws_account_id = {
-  sbx = "674293488770"
+  sbx = "735972722491"
 }
 
 db_users = [
