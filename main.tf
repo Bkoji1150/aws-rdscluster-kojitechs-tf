@@ -363,7 +363,6 @@ resource "aws_appautoscaling_policy" "this" {
   ]
 }
 
-
 ################################################################################
 # Security Group
 ################################################################################
@@ -385,13 +384,13 @@ resource "aws_security_group" "lambda_sg" {
   description = coalesce(var.security_group_description, "lambda traffic to/from RDS Aurora ${var.name}")
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = local.port
+    to_port     = local.port
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = merge(var.tags, var.security_group_tags, { Name = "${var.component_name}-lambda-sg" })
-    lifecycle {
+  lifecycle {
     create_before_destroy = true
   }
 }
@@ -416,12 +415,12 @@ resource "aws_security_group_rule" "cidr_ingress" {
 
   description = "From allowed CIDRs"
 
-  type                     = "ingress"
-  from_port                = local.port
-  to_port                  = local.port
-  protocol                 = "tcp"
-  cidr_blocks = var.allowed_cidr_blocks
-  security_group_id        = local.rds_security_group_id
+  type              = "ingress"
+  from_port         = local.port
+  to_port           = local.port
+  protocol          = "tcp"
+  cidr_blocks       = var.allowed_cidr_blocks
+  security_group_id = local.rds_security_group_id
 }
 
 resource "aws_security_group_rule" "egress" {
