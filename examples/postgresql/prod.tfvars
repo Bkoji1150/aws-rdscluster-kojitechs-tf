@@ -27,38 +27,21 @@ schemas_list_owners = [
   }
 ]
 
-# db_users_privileges = [
-#   {
-#     database   = "api"
-#     privileges = ["SELECT"]
-#     schema     = "kojitech"
-#     type       = "table"
-#     user       = "readonly"
-#     objects    = []
-#   },
-#   {
-#     database   = "api"
-#     privileges = ["USAGE"]
-#     schema     = "kojitech"
-#     type       = "schema"
-#     user       = "readwrite"
-#     objects    = []
-#   },
-# ]
-# {
-#   database   = "api"
-#   privileges = ["SELECT"]
-#   schema     = "public"
-#   type       = "table"
-#   user       = "readonly"
-#   objects    = ["products"]
-# },
-# {
-#   database   = "api"
-#   privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-#   schema     = "public"
-#   type       = "table"
-#   user       = "readwrite"
-#   objects    = ["products"]
-# },
-#]
+db_users_privileges = [
+  {
+    database   = "kojitechkart"
+    privileges = ["USAGE"]
+    schema     = "kojitechkart"
+    type       = "schema"
+    user       = "kojitechs"
+    objects    = []
+  },
+  {
+    database   = "kojitechkart"
+    privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    schema     = "kojitechkart"
+    type       = "table"
+    user       = "kojitechs"
+    objects    = [""]
+  },
+]

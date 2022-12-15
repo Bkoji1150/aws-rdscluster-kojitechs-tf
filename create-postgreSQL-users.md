@@ -80,3 +80,7 @@ db_users_privileges = [
   },
 ]
 ```
+## SET SEARCH PATH:
+```sql
+ SET search_path TO kojitechkart;   
+```
