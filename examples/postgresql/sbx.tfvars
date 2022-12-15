@@ -4,6 +4,7 @@ aws_account_id = {
 
 db_users = [
   "kojitechs",
+  "api"
 ]
 
 databases_created = [
