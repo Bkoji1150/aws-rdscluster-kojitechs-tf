@@ -90,6 +90,7 @@ resource "aws_secretsmanager_secret_rotation" "multiuser_sercrets" {
     automatically_after_days = var.rotation_days
   }
 }
+
 resource "random_password" "master_password" {
   length  = 16
   special = false
