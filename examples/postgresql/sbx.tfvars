@@ -59,3 +59,4 @@ schemas_list_owners = [
 #   user       = "readwrite"
 #   objects    = ["products"]
 # },
+#]
