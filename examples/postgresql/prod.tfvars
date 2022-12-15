@@ -36,12 +36,5 @@ db_users_privileges = [
     user       = "kojitechs"
     objects    = []
   },
-  {
-    database   = "kojitechkart"
-    privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-    schema     = "kojitechkart"
-    type       = "table"
-    user       = "kojitechs"
-    objects    = [""]
-  },
+
 ]
