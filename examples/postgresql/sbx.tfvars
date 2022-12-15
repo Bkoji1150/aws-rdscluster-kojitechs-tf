@@ -6,6 +6,7 @@ db_users = [
   "kojitechs",
   "api",
   "readonly",
+  "readwrite",
 ]
 
 databases_created = [
