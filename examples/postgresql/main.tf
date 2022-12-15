@@ -9,16 +9,6 @@ data "terraform_remote_state" "operational_environment" {
   }
 }
 
-data "terraform_remote_state" "operational_sbx" {
-  backend = "s3"
-
-  config = {
-    region = "us-east-1"
-    bucket = "operational.vpc.tf.kojitechs"
-    key    = format("env:/%s/path/env", "prod")
-  }
-}
-
 data "terraform_remote_state" "jenkins_sg" {
   backend = "s3"
 
@@ -80,7 +70,7 @@ module "aurora" {
   db_subnet_group_name    = local.db_subnets_names
   create_db_subnet_group  = false
   allowed_security_groups = [data.terraform_remote_state.jenkins_sg.outputs.jenkins_security_id]
-  allowed_cidr_blocks     = compact(concat(local.private_sunbet_cidrs, data.terraform_remote_state.operational_sbx.outputs.private_subnets_cidrs))
+  allowed_cidr_blocks     = local.private_sunbet_cidrs
   subnets                 = local.private_subnets_ids
 
   create_security_group = true
