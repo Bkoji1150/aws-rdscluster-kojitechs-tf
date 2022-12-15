@@ -49,7 +49,7 @@ resource "aws_kms_alias" "default" {
 
 resource "aws_secretsmanager_secret" "default" {
   name_prefix = "${var.component_name}-${var.master_username}-"
-  description = "Username and password for RDS user ${var.master_username} on ${aws_rds_cluster.this[0].id}"
+  description = "Username and password for master user ${var.master_username} on ${aws_rds_cluster.this[0].id}"
   kms_key_id  = aws_kms_key.default.key_id
 }
 
