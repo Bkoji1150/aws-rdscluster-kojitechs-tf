@@ -87,5 +87,10 @@ module "aurora" {
   enabled_cloudwatch_logs_exports = ["postgresql"]
   database_name                   = "postgres_aurora"
   master_username                 = var.master_username
-  db_users                        = var.db_users
+
+  ################ database object
+  db_users            = var.db_users
+  databases_created   = var.databases_created
+  schemas_list_owners = var.schemas_list_owners
+  db_users_privileges = var.db_users_privileges
 }
