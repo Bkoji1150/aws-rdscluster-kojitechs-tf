@@ -385,9 +385,9 @@ resource "aws_security_group" "lambda_sg" {
   description = coalesce(var.security_group_description, "lambda traffic to/from RDS Aurora ${var.name}")
 
   egress {
-    from_port   = local.port
-    to_port     = local.port
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = merge(var.tags, var.security_group_tags, { Name = "${var.component_name}-lambda-sg" })
