@@ -3,9 +3,8 @@ aws_account_id = {
 }
 
 db_users = [
-  "kojitechs"
+  "kojitechs",
 ]
-
 
 databases_created = [
   "kojitechkart",
