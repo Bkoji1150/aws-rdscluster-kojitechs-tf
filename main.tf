@@ -20,7 +20,6 @@ locals {
     port     = local.port
     dbname   = var.database_name
   }
-
   common_tenable_values = {
     engine    = "postgres"
     host      = try(aws_rds_cluster.this[0].endpoint, "")
