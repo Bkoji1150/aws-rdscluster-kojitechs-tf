@@ -56,10 +56,11 @@ module "aurora" {
     }
   }
 
-  vpc_id                 = local.vpc_id
-  db_subnet_group_name   = local.db_subnets_names
-  create_db_subnet_group = false
-  subnets                = local.private_subnets_ids
+  vpc_id                  = local.vpc_id
+  db_subnet_group_name    = local.db_subnets_names
+  create_db_subnet_group  = false
+  allowed_security_groups = [aws_security_group.jumber_sever.id]
+  subnets                 = local.private_subnets_ids
 
   create_security_group = true
   security_group_egress_rules = {
