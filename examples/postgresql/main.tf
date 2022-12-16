@@ -9,16 +9,6 @@ data "terraform_remote_state" "operational_environment" {
   }
 }
 
-data "terraform_remote_state" "jenkins_sg" {
-  backend = "s3"
-
-  config = {
-    region = "us-east-1"
-    bucket = "kojitechs.aws.eks.with.terraform.tf"
-    key    = format("env:/%s/path/env/deploysingle", "prod")
-  }
-}
-
 locals {
   name                 = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
   operational_state    = data.terraform_remote_state.operational_environment.outputs
@@ -66,12 +56,10 @@ module "aurora" {
     }
   }
 
-  vpc_id                  = local.vpc_id
-  db_subnet_group_name    = local.db_subnets_names
-  create_db_subnet_group  = false
-  allowed_security_groups = [data.terraform_remote_state.jenkins_sg.outputs.jenkins_security_id]
-  allowed_cidr_blocks     = local.private_sunbet_cidrs
-  subnets                 = local.private_subnets_ids
+  vpc_id                 = local.vpc_id
+  db_subnet_group_name   = local.db_subnets_names
+  create_db_subnet_group = false
+  subnets                = local.private_subnets_ids
 
   create_security_group = true
   security_group_egress_rules = {

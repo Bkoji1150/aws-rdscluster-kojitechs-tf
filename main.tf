@@ -396,6 +396,17 @@ resource "aws_security_group" "lambda_sg" {
   }
 }
 
+resource "aws_security_group_rule" "Allow_Lambda_ingress_access_to_db" {
+  description = "Allow Lambda ingress access to db"
+
+  type                     = "ingress"
+  from_port                = local.port
+  to_port                  = local.port
+  protocol                 = "tcp"
+  security_group_id        = local.rds_security_group_id
+  source_security_group_id = aws_security_group.lambda_sg.id
+}
+
 # TODO - change to map of ingress rules under one resource at next breaking change
 resource "aws_security_group_rule" "default_ingress" {
   count = local.create_cluster && var.create_security_group ? length(var.allowed_security_groups) : 0
