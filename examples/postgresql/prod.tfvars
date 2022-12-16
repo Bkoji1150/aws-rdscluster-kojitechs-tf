@@ -36,5 +36,12 @@ db_users_privileges = [
     user       = "kojitechs"
     objects    = []
   },
-
+  {
+    database   = "postgres_aurora"
+    privileges = ["USAGE"]
+    schema     = "public"
+    type       = "schema"
+    user       = "kojitechs"
+    objects    = []
+  },
 ]
