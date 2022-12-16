@@ -6,10 +6,10 @@ db_users = [
   "kojitechs",
 ]
 
-# databases_created = [
-#   "kojitechkart",
-#   "api",
-# ]
+databases_created = [
+  "kojitechkart",
+  "api",
+]
 
 schemas_list_owners = [
   {
