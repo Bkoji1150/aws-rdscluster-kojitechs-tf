@@ -114,7 +114,7 @@ output "security_group_id" {
 }
 
 # Lambda secrity_group
-output "security_group_id" {
+output "lambda_security_group_id" {
   description = "The security group ID of the cluster"
   value       = aws_security_group.lambda_sg.id
 }
