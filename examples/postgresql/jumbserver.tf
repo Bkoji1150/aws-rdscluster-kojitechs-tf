@@ -96,7 +96,6 @@ resource "aws_instance" "jumber_sever" {
   instance_type          = "t2.xlarge"
   subnet_id              = local.private_subnets_ids[0]
   vpc_security_group_ids = [aws_security_group.jumber_sever.id]
-  user_data              = file("./templates/jumber_sever.sh")
   iam_instance_profile   = aws_iam_instance_profile.instance_profile.name
 
   tags = {
