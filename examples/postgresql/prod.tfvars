@@ -23,21 +23,21 @@ schemas_list_owners = [
   }
 ]
 
-# db_users_privileges = [
-#   {
-#     database   = "postgres_aurora"
-#     privileges = ["USAGE"]
-#     schema     = "public"
-#     type       = "schema"
-#     user       = "kojitechs"
-#     objects    = []
-#   },
-#   {
-#     database   = "postgres_aurora"
-#     privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-#     schema     = "public"
-#     type       = "table"
-#     user       = "kojitechs"
-#     objects    = []
-#   },
-# ]
+db_users_privileges = [
+  {
+    database   = "kojitechkart"
+    privileges = ["USAGE"]
+    schema     = "public"
+    type       = "schema"
+    user       = "kojitechs"
+    objects    = []
+  },
+  {
+    database   = "kojitechkart"
+    privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    schema     = "public"
+    type       = "table"
+    user       = "kojitechs"
+    objects    = []
+  },
+]
