@@ -116,3 +116,8 @@ output "users_secrets_version" {
   description = "The security group ID of the cluster"
   value       = module.aurora.users_secrets_version
 }
+
+output "db_security_group_id" {
+  description = "The security group ID of the cluster"
+  value       = module.aurora.security_group_id
+}

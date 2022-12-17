@@ -5,7 +5,7 @@ terraform {
   backend "s3" {
     bucket         = "kojitechs.aws.eks.with.terraform.tf"
     dynamodb_table = "terraform-lock"
-    key            = "path/env/aws-rdscluster-kojitechs-tf" #
+    key            = "path/env/aws-rdscluster-kojitechs-tf" # aws-rdscluster-kojitechs-tf
     region         = "us-east-1"
     encrypt        = "true"
   }
