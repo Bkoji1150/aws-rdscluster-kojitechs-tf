@@ -2,30 +2,30 @@ aws_account_id = {
   sbx = "674293488770"
 }
 
-db_users = [
-  "kojitechs",
-  "api",
-  "readonly",
-  "readwrite",
-]
+# db_users = [
+#   "kojitechs",
+#   "api",
+#   "readonly",
+#   "readwrite",
+# ]
 
-databases_created = [
-  "kojitechkart",
-  "api",
-]
+# databases_created = [
+#   "kojitechkart",
+#   "api",
+# ]
 
-schemas_list_owners = [
-  {
-    database           = "kojitechkart"
-    name_of_theschema  = "kojitechkart"
-    onwer              = "kojitechs"
-    usage              = true
-    role               = null
-    with_create_object = true
-    with_usage         = true
-    role_name          = "kojitechs"
-  }
-]
+# schemas_list_owners = [
+#   {
+#     database           = "kojitechkart"
+#     name_of_theschema  = "kojitechkart"
+#     onwer              = "kojitechs"
+#     usage              = true
+#     role               = null
+#     with_create_object = true
+#     with_usage         = true
+#     role_name          = "kojitechs"
+#   }
+# ]
 
 # db_users_privileges = [
 #   {
