@@ -527,6 +527,11 @@ variable "rotation_type" {
   default     = "multi"
 }
 
+variable "rotation_type_single" {
+  type        = string
+  description = "Is this `single` or `multi` user rotation?"
+  default     = "single"
+}
 variable "rotation_days" {
   type        = number
   description = "How often in days the secret will be rotated"
