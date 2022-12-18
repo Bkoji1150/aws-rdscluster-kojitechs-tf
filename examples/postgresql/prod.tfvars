@@ -3,7 +3,6 @@ aws_account_id = {
 }
 
 db_users = [
-  "kojitechs",
   "sonarqube"
 ]
 
@@ -12,16 +11,16 @@ databases_created = [
 ]
 
 schemas_list_owners = [
-  {
-    database           = "kojitechkart"
-    name_of_theschema  = "kojitechkart"
-    onwer              = "kojitechs"
-    usage              = true
-    role               = null
-    with_create_object = true
-    with_usage         = true
-    role_name          = "kojitechs"
-  },
+  # {
+  #   database           = "kojitechkart"
+  #   name_of_theschema  = "kojitechkart"
+  #   onwer              = "kojitechs"
+  #   usage              = true
+  #   role               = null
+  #   with_create_object = true
+  #   with_usage         = true
+  #   role_name          = "kojitechs"
+  # },
   {
     database           = "sonar"
     name_of_theschema  = "sonarqube"
@@ -34,21 +33,21 @@ schemas_list_owners = [
   }
 ]
 
-db_users_privileges = [
-  {
-    database   = "kojitechkart"
-    privileges = ["USAGE"]
-    schema     = "public"
-    type       = "schema"
-    user       = "kojitechs"
-    objects    = []
-  },
-  {
-    database   = "kojitechkart"
-    privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-    schema     = "public"
-    type       = "table"
-    user       = "kojitechs"
-    objects    = []
-  },
-]
+# db_users_privileges = [
+#   # {
+#   #   database   = "kojitechkart"
+#   #   privileges = ["USAGE"]
+#   #   schema     = "public"
+#   #   type       = "schema"
+#   #   user       = "kojitechs"
+#   #   objects    = []
+#   # },
+#   # {
+#   #   database   = "kojitechkart"
+#   #   privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+#   #   schema     = "public"
+#   #   type       = "table"
+#   #   user       = "kojitechs"
+#   #   objects    = []
+#   # },
+# ]
