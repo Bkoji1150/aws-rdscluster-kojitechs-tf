@@ -376,6 +376,9 @@ resource "aws_security_group" "this" {
   description = coalesce(var.security_group_description, "Control traffic to/from RDS Aurora ${var.name}")
 
   tags = merge(var.tags, var.security_group_tags, { Name = var.name })
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_security_group" "lambda_sg" {
@@ -405,6 +408,9 @@ resource "aws_security_group_rule" "Allow_Lambda_ingress_access_to_db" {
   protocol                 = "tcp"
   security_group_id        = local.rds_security_group_id
   source_security_group_id = aws_security_group.lambda_sg.id
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # TODO - change to map of ingress rules under one resource at next breaking change
@@ -419,6 +425,9 @@ resource "aws_security_group_rule" "default_ingress" {
   protocol                 = "tcp"
   source_security_group_id = element(var.allowed_security_groups, count.index)
   security_group_id        = local.rds_security_group_id
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # TODO - change to map of ingress rules under one resource at next breaking change
@@ -433,6 +442,9 @@ resource "aws_security_group_rule" "cidr_ingress" {
   protocol          = "tcp"
   cidr_blocks       = var.allowed_cidr_blocks
   security_group_id = local.rds_security_group_id
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_security_group_rule" "egress" {
@@ -449,6 +461,9 @@ resource "aws_security_group_rule" "egress" {
   ipv6_cidr_blocks         = lookup(each.value, "ipv6_cidr_blocks", null)
   prefix_list_ids          = lookup(each.value, "prefix_list_ids", null)
   source_security_group_id = lookup(each.value, "source_security_group_id", null)
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "random_pet" "this" {
@@ -506,3 +521,5 @@ module "lambda_function" {
     Module = "${var.component_name}-function"
   }
 }
+
+# module.aurora.aws_security_group.lambda_sg

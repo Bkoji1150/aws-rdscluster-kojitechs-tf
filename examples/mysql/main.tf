@@ -3,7 +3,6 @@ locals {
   name = "kojitechs-${replace(basename(var.component_name), "_", "-")}"
 }
 
-
 data "terraform_remote_state" "operational_environment" {
   backend = "s3"
 
