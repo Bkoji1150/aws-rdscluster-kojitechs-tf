@@ -51,6 +51,6 @@ db_users_privileges = [
     schema     = "sonarqube"
     type       = "table"
     user       = "readonly"
-    objects    = []
+    objects    = ["users"]
   },
 ]
