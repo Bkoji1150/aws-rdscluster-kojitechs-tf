@@ -38,6 +38,14 @@ schemas_list_owners = [
 
 db_users_privileges = [
   {
+    database   = "kojitechkart"
+    privileges = ["USAGE"]
+    schema     = "sonarqube"
+    type       = "schema"
+    user       = "readonly"
+    objects    = []
+  },
+  {
     database   = "sonar"
     privileges = ["SELECT"]
     schema     = "sonarqube"
