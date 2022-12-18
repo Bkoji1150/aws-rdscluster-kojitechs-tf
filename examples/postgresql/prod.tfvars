@@ -45,14 +45,7 @@ db_users_privileges = [
     user       = "readonly"
     objects    = []
   },
-  {
-    database   = "sonar"
-    privileges = ["SELECT"]
-    schema     = "sonarqube"
-    type       = "schema"
-    user       = "readonly"
-    objects    = []
-  },
+
   {
     database   = "sonar"
     privileges = ["SELECT"]
