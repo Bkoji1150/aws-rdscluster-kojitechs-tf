@@ -3,19 +3,18 @@ aws_account_id = {
 }
 
 db_users = [
-  "sonarqube",
   "kojitechs",
-  "readonly"
+  "sonarqube"
 ]
 
 databases_created = [
+  "kojitechkart",
   "sonar",
-  "kojitechs-kart"
 ]
 
 schemas_list_owners = [
   {
-    database           = "kojitechs-kart"
+    database           = "kojitechkart"
     name_of_theschema  = "kojitechkart"
     onwer              = "kojitechs"
     usage              = true
@@ -38,7 +37,7 @@ schemas_list_owners = [
 
 # db_users_privileges = [
 #   {
-#     database   = "kojitechs-kart"
+#     database   = "kojitechkart"
 #     privileges = ["USAGE"]
 #     schema     = "public"
 #     type       = "schema"
