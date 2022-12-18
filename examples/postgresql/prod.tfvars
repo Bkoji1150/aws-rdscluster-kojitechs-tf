@@ -11,16 +11,6 @@ databases_created = [
 ]
 
 schemas_list_owners = [
-  # {
-  #   database           = "kojitechkart"
-  #   name_of_theschema  = "kojitechkart"
-  #   onwer              = "kojitechs"
-  #   usage              = true
-  #   role               = null
-  #   with_create_object = true
-  #   with_usage         = true
-  #   role_name          = "kojitechs"
-  # },
   {
     database           = "sonar"
     name_of_theschema  = "sonarqube"
