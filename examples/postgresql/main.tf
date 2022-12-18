@@ -58,7 +58,7 @@ module "aurora" {
   slack_token    = jsondecode(local.operational_state.secrets_version.slacktoken)["slacktoken"]
   name           = local.name
   engine         = "aurora-postgresql"
-  engine_version = "11.12"
+  engine_version = "11.13"
   instances = {
     1 = {
       instance_class      = "db.r5.2xlarge"
