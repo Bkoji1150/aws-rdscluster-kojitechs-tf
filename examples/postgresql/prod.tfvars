@@ -8,7 +8,6 @@ db_users = [
 ]
 
 databases_created = [
-  "kojitechkart",
   "sonar",
 ]
 
