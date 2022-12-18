@@ -10,11 +10,12 @@ db_users = [
 
 databases_created = [
   "sonar",
+  "kojitechs-kart"
 ]
 
 schemas_list_owners = [
   {
-    database           = "kojitechkart"
+    database           = "kojitechs-kart"
     name_of_theschema  = "kojitechkart"
     onwer              = "kojitechs"
     usage              = true
@@ -36,20 +37,20 @@ schemas_list_owners = [
 ]
 
 # db_users_privileges = [
-#   # {
-#   #   database   = "kojitechkart"
-#   #   privileges = ["USAGE"]
-#   #   schema     = "public"
-#   #   type       = "schema"
-#   #   user       = "kojitechs"
-#   #   objects    = []
-#   # },
-#   # {
-#   #   database   = "kojitechkart"
-#   #   privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-#   #   schema     = "public"
-#   #   type       = "table"
-#   #   user       = "kojitechs"
-#   #   objects    = []
-#   # },
+#   {
+#     database   = "kojitechs-kart"
+#     privileges = ["USAGE"]
+#     schema     = "public"
+#     type       = "schema"
+#     user       = "kojitechs"
+#     objects    = []
+#   },
+#   {
+#     database   = "kojitechkart"
+#     privileges = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+#     schema     = "public"
+#     type       = "table"
+#     user       = "kojitechs"
+#     objects    = []
+#   },
 # ]
