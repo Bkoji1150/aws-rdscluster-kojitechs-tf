@@ -6,7 +6,8 @@ db_users = [
   "kojitechs",
   "sonarqube",
   "readonly",
-  "kojitechsapi"
+  "kojitechsapi",
+  "readwrite",
 ]
 
 databases_created = [
