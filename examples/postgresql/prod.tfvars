@@ -3,10 +3,10 @@ aws_account_id = {
 }
 
 db_users = [
+  "kojitechs",
   "sonarqube",
   "readonly",
   "kojitechsapi",
-  "readwrite",
 ]
 
 databases_created = [
