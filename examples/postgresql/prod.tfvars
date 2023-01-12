@@ -34,14 +34,4 @@ schemas_list_owners = [
     with_usage         = true
     role_name          = "sonarqube"
   },
-  {
-    database           = "kojitechs-api"
-    name_of_theschema  = "kojitechsapi"
-    onwer              = "kojitechsapi"
-    usage              = true
-    role               = null
-    with_create_object = true
-    with_usage         = true
-    role_name          = "kojitechsapi"
-  },
 ]
