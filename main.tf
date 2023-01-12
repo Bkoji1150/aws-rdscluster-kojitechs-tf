@@ -54,7 +54,7 @@ resource "aws_secretsmanager_secret" "default" {
 }
 
 resource "aws_secretsmanager_secret" "users_secret" {
-
+  depends_on              = [aws_rds_cluster.this]
   for_each                = toset(keys(random_password.users_password))
   name_prefix             = format("%s-%s-", var.component_name, each.key)
   description             = "secret to manage user credential of ${each.key} on ${format("%s-%s", var.component_name, terraform.workspace)} instance"
@@ -63,6 +63,7 @@ resource "aws_secretsmanager_secret" "users_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "master_secret_value" {
+  depends_on    = [aws_rds_cluster.this]
   secret_id     = aws_secretsmanager_secret.default.id
   secret_string = jsonencode(local.secrete_values)
 }
