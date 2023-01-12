@@ -2,16 +2,16 @@ aws_account_id = {
   prod = "735972722491"
 }
 
-# db_users = [
-#   "kojitechs",
-#   "sonarqube",
-# ]
+db_users = [
+  "kojitechs",
+  "sonarqube",
+]
 
-# databases_created = [
-#   "kojitechkart",
-#   "sonar",
-#   "kojitechs-api",
-# ]
+databases_created = [
+  "kojitechkart",
+  "sonar",
+  "kojitechs-api",
+]
 
 # schemas_list_owners = [
 #   {
