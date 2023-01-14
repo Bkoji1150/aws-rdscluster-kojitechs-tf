@@ -5,12 +5,13 @@ aws_account_id = {
 db_users = [
   "kojitechs",
   "sonarqube",
+  "sonarscannar",
 ]
 
 databases_created = [
   "kojitechkart",
   "sonar",
-  "kojitechs-api",
+  "sonarscannar",
 ]
 
 schemas_list_owners = [
@@ -33,5 +34,15 @@ schemas_list_owners = [
     with_create_object = true
     with_usage         = true
     role_name          = "sonarqube"
+  },
+  {
+    database           = "sonarscannar"
+    name_of_theschema  = "sonarscannar"
+    onwer              = "sonarscannar"
+    usage              = true
+    role               = null
+    with_create_object = true
+    with_usage         = true
+    role_name          = "sonarscannar"
   },
 ]
