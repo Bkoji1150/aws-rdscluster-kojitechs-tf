@@ -15,7 +15,7 @@ data "terraform_remote_state" "jenkins_sg" {
   config = {
     region = "us-east-1"
     bucket = "kojitechs.aws.eks.with.terraform.tf"
-    key    = format("env:/%s/path/env/deploysingle", terraform.workpace)
+    key    = format("env:/%s/path/env/deploysingle", terraform.workspace)
   }
 }
 
