@@ -69,7 +69,7 @@ module "aurora" {
   vpc_id                  = local.vpc_id
   db_subnet_group_name    = local.db_subnets_names
   create_db_subnet_group  = false
-  allowed_security_groups = [data.terraform_remote_state.jenkins_sg.outputs.jenkins_security_id, aws_security_group.jumber_sever.id]
+  allowed_security_groups = [data.terraform_remote_state.jenkins_sg.outputs.jenkins_security_id]
   subnets                 = local.private_subnets_ids
 
   create_security_group = true
