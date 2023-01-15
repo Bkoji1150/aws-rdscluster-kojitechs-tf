@@ -1,5 +1,5 @@
 aws_account_id = {
-  prod = "181437319056"
+  shared = "181437319056"
 }
 
 db_users = [
