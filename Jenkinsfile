@@ -2,7 +2,7 @@
 pipeline {
         agent any
     parameters { 
-        choice(name: 'ENVIRONMENT', choices: ['prod', 'prod', 'sbx', 'shared'], description: "SELECT THE ACCOUNT YOU'D LIKE TO DEPLOY TO.")
+        choice(name: 'ENVIRONMENT', choices: ['shared', 'prod', 'sbx', 'shared'], description: "SELECT THE ACCOUNT YOU'D LIKE TO DEPLOY TO.")
         choice(name: 'ACTION', choices: ['apply', 'apply', 'destroy'], description: 'Select action, BECAREFUL IF YOU SELECT DESTROY TO PROD')
     }
     stages{    
