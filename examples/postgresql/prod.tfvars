@@ -5,6 +5,7 @@ aws_account_id = {
 db_users = [
   "kojitechs",
   "sonarqube",
+  "kojitechs-api"
 ]
 
 databases_created = [
